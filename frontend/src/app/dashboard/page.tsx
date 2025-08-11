@@ -46,7 +46,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#232946] via-[#2d3250] to-[#f6c177]">
+      {/* Peaceful blurred mountain hiker background */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center blur-[3px] opacity-60 -z-20"
+        style={{
+          backgroundImage: "url('/mountain-hiker-bg.png')"
+        }}
+        aria-hidden="true"
+      />
+      {/* Gentle dark overlay for contrast and calmness */}
+      <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black/50 via-indigo-900/30 to-transparent -z-10" aria-hidden="true" />
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
