@@ -10,14 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Mail, User, MapPin, Heart, Plane, Phone, Globe, Tag, Plus, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 
-const predefinedAvatars = [
-  { id: 1, url: '/avatars/doodle1.png', name: 'Doodle 1', emoji: '😊' },
-  { id: 2, url: '/avatars/doodle2.png', name: 'Doodle 2', emoji: '🌟' },
-  { id: 3, url: '/avatars/doodle3.png', name: 'Doodle 3', emoji: '🎨' },
-  { id: 4, url: '/avatars/doodle4.png', name: 'Doodle 4', emoji: '🚀' },
-  { id: 5, url: '/avatars/doodle5.png', name: 'Doodle 5', emoji: '🌺' },
-  { id: 6, url: '/avatars/doodle6.png', name: 'Doodle 6', emoji: '⚡' },
-];
+
 
 const countryList = [
   'United States', 'India', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'France', 'Japan', 'China', 'Brazil', 'South Africa', 'Other',
@@ -205,48 +198,66 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background gradients */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-gradient-to-br from-emerald-200/30 to-teal-200/30 blur-3xl animate-float" />
-        <div className="absolute top-1/3 -right-24 h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-purple-200/25 to-indigo-200/25 blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute -bottom-24 left-1/3 h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-blue-200/20 to-cyan-200/20 blur-3xl animate-float" style={{ animationDelay: '4s' }} />
+    <div className="min-h-screen bg-[#f5f3ff] relative overflow-hidden">
+      {/* Blurred adventure background image */}
+      <div className="fixed inset-0 w-full h-full bg-cover bg-center blur-[6px] opacity-60 -z-20" style={{ backgroundImage: "url('/mountain-hiker-bg.png')" }} aria-hidden="true" />
+      {/* Doodles: static SVGs for background */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <svg className="absolute top-10 left-10 w-8 h-8 opacity-50" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="12" y="20" width="24" height="18" rx="4"/><path d="M16 20v-4a8 8 0 0 1 16 0v4"/></svg>
+        <svg className="absolute bottom-10 left-10 w-8 h-8 opacity-40" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="16" y="16" width="16" height="20" rx="3"/><path d="M24 16v-6"/><circle cx="20" cy="38" r="2"/><circle cx="28" cy="38" r="2"/></svg>
+        <svg className="absolute top-10 right-10 w-8 h-8 opacity-40" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M8 24a16 16 0 0 1 32 0z"/><path d="M24 24v12"/><circle cx="24" cy="40" r="2"/></svg>
+        <svg className="absolute bottom-10 right-10 w-8 h-8 opacity-50" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="6" y="18" width="36" height="16" rx="4"/><circle cx="14" cy="36" r="2"/><circle cx="34" cy="36" r="2"/><path d="M6 26h36"/></svg>
+        <svg className="absolute top-1/4 left-1/6 w-8 h-8 opacity-40" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="14" y="18" width="20" height="18" rx="6"/><path d="M24 18v-6"/><path d="M18 36v4"/><path d="M30 36v4"/></svg>
+        <svg className="absolute top-1/3 right-1/6 w-8 h-8 opacity-40" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="10" y="18" width="28" height="18" rx="4"/><circle cx="24" cy="27" r="6"/><path d="M18 18l2-4h8l2 4"/></svg>
+        <svg className="absolute bottom-1/4 left-1/6 w-8 h-8 opacity-40" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><circle cx="24" cy="24" r="10"/><path d="M24 14v10l7 7"/></svg>
+        <svg className="absolute bottom-1/3 right-1/6 w-8 h-8 opacity-40" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M4 40l12-20 8 12 8-16 12 24z"/></svg>
       </div>
 
       <div className="min-h-screen flex items-center justify-center p-3 sm:p-6">
-        <div className="w-full max-w-2xl glass-nature rounded-3xl shadow-2xl border border-border/40 overflow-hidden backdrop-blur-xl">
+        <div className="w-full max-w-2xl glass-nature rounded-3xl border border-[#bca3e3]/40 overflow-hidden"
+          style={{ background: '#f8f6ffcc', backdropFilter: 'blur(12px)', boxShadow: '0 8px 32px 0 #735c98cc, 0 0 0 6px #735c98' }}>
           <div className="p-6 sm:p-10">
+            {/* ...existing code... */}
             {/* Header */}
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mb-4">
-                <Plane className="h-8 w-8 text-primary mr-2" />
-                <h1 className="text-3xl font-bold text-foreground">GlobeTrotter</h1>
+                <Plane className="h-8 w-8" style={{ color: '#735c98', marginRight: '0.5rem' }} />
+                <h1 className="text-3xl font-bold" style={{ color: '#3a256a' }}>GlobeTrotter</h1>
               </div>
-              <p className="text-muted-foreground">Sign up and start your journey!</p>
+              <p style={{ color: '#3a256a', fontWeight: 500 }}>Sign up and start your journey!</p>
             </div>
 
             {/* Progress Bar */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                {[1, 2, 3].map((step) => (
-                  <div key={step} className="flex items-center">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                      currentStep >= step 
-                        ? 'bg-primary border-primary text-white' 
-                        : 'border-border bg-background text-muted-foreground'
-                    }`}>
-                      {currentStep > step ? <Check className="h-5 w-5" /> : step}
+                {[1, 2, 3].map((step, idx) => (
+                  <React.Fragment key={step}>
+                    <div className="flex items-center">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                        currentStep >= step 
+                          ? 'bg-primary border-primary text-white' 
+                          : 'border-border bg-background text-muted-foreground'
+                      }`}>
+                        {currentStep > step ? <Check className="h-5 w-5" /> : step}
+                      </div>
                     </div>
                     {step < 3 && (
-                      <div className={`w-16 h-1 mx-2 transition-colors duration-300 ${
-                        currentStep > step ? 'bg-primary' : 'bg-border'
-                      }`} />
+                      <div
+                        className={`h-1 mx-2 transition-colors duration-300 flex-1 ${
+                          currentStep > step
+                            ? 'bg-primary'
+                            : currentStep === step
+                              ? 'bg-primary/60'
+                              : 'bg-border'
+                        }`}
+                        style={{ minWidth: 64 }}
+                      />
                     )}
-                  </div>
+                  </React.Fragment>
                 ))}
               </div>
               <div className="text-center">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm" style={{ color: '#3a256a', fontWeight: 500 }}>
                   Step {currentStep} of 3: {
                     currentStep === 1 ? 'Basic Information' :
                     currentStep === 2 ? 'Personal Details' :
@@ -259,15 +270,52 @@ export default function RegisterPage() {
             {/* Step 1: Basic Information */}
             {currentStep === 1 && (
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                {/* Profile Picture Upload centered above Full Name and Email Address */}
+                <div className="flex flex-col items-center mb-4">
+                  <div className="relative group mb-2">
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('profile-upload-input')?.click()}
+                      className="w-20 h-20 rounded-full bg-[#ede9fe] border-4 border-[#735c98] flex items-center justify-center shadow-lg hover:bg-[#e3d7fc] transition-colors focus:outline-none focus:ring-2 focus:ring-[#735c98]/40"
+                      aria-label="Add profile picture"
+                    >
+                      {profilePictureUrl ? (
+                        <img src={profilePictureUrl} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        <Plus className="w-8 h-8 text-[#735c98]" />
+                      )}
+                      <input
+                        id="profile-upload-input"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={e => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = ev => setProfilePictureUrl(ev.target?.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      {!profilePictureUrl && (
+                        <span className="absolute bottom-2 right-2 bg-white rounded-full p-1 border border-[#735c98]">
+                          <Plus className="w-4 h-4 text-[#735c98]" />
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                  <span className="text-xs" style={{ color: '#3a256a' }}>Add a profile picture (optional)</span>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Full Name</label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#735c98' }} />
                       <input 
                         {...step1Form.register('name')} 
                         type="text" 
-                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl" style={{ background: '#f3edff', color: '#3a256a' }}
                         placeholder="Enter your full name" 
                       />
                     </div>
@@ -276,13 +324,13 @@ export default function RegisterPage() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Email Address</label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#735c98' }} />
                       <input 
                         {...step1Form.register('email')} 
                         type="email" 
-                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl" style={{ background: '#f3edff', color: '#3a256a' }}
                         placeholder="Enter your email" 
                       />
                     </div>
@@ -293,12 +341,12 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Password</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Password</label>
                   <div className="relative">
                     <input 
                       {...step1Form.register('password')} 
                       type="password" 
-                      className="w-full py-3 px-4 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                      className="w-full py-3 px-4 border border-border rounded-xl" style={{ background: '#f3edff', color: '#3a256a' }}
                       placeholder="Enter a strong password" 
                     />
                   </div>
@@ -308,12 +356,12 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Confirm Password</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Confirm Password</label>
                   <div className="relative">
                     <input 
                       {...step1Form.register('confirmPassword')} 
                       type="password" 
-                      className="w-full py-3 px-4 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                      className="w-full py-3 px-4 border border-border rounded-xl" style={{ background: '#f3edff', color: '#3a256a' }}
                       placeholder="Confirm your password" 
                     />
                   </div>
@@ -324,15 +372,15 @@ export default function RegisterPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>
                       Phone Number <span className="text-muted-foreground">(Optional)</span>
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#735c98' }} />
                       <input 
                         {...step1Form.register('phone')} 
                         type="tel" 
-                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl" style={{ background: '#f3edff', color: '#3a256a' }}
                         placeholder="e.g. 9876543210" 
                       />
                     </div>
@@ -341,13 +389,13 @@ export default function RegisterPage() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">City</label>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>City</label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#735c98' }} />
                       <input 
                         {...step1Form.register('city')} 
                         type="text" 
-                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl" style={{ background: '#f3edff', color: '#3a256a' }}
                         placeholder="Enter your city" 
                       />
                     </div>
@@ -358,12 +406,12 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Country</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Country</label>
                   <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5" style={{ color: '#735c98' }} />
                     <select 
                       {...step1Form.register('country')} 
-                      className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors"
+                      className="w-full pl-10 pr-4 py-3 border border-border rounded-xl" style={{ background: '#f3edff', color: '#3a256a' }}
                     >
                       <option value="">Select your country</option>
                       {countryList.map((country) => (
@@ -381,30 +429,16 @@ export default function RegisterPage() {
             {/* Step 2: Personal Details */}
             {currentStep === 2 && (
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                {/* Profile Picture Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-4">Profile Picture</label>
-                  <div className="flex justify-center">
-                    <ProfilePictureUpload
-                      currentImageUrl={profilePictureUrl || undefined}
-                      onImageChange={setProfilePictureUrl}
-                      size="lg"
-                      userName={step1Form.getValues('name')}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Upload a profile picture or skip to continue (you can add one later)
-                  </p>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Age</label>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Age</label>
                     <input 
                       {...step2Form.register('age', { valueAsNumber: true })} 
                       type="number" 
                       min={13} 
-                      className="w-full py-3 px-4 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                      className="w-full py-3 px-4 border border-border rounded-xl" 
+                      style={{ background: '#f3edff', color: '#3a256a' }}
                       placeholder="Enter your age" 
                     />
                     {step2Form.formState.errors.age && (
@@ -412,13 +446,13 @@ export default function RegisterPage() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Are you a student?</label>
-                    <div className="flex gap-4 items-center text-foreground mt-3">
-                      <label className="flex items-center gap-2">
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Are you a student?</label>
+                    <div className="flex gap-4 items-center mt-3">
+                      <label className="flex items-center gap-2" style={{ color: '#3a256a' }}>
                         <input type="radio" value="Yes" {...step2Form.register('isStudent')} className="accent-primary" /> 
                         Yes
                       </label>
-                      <label className="flex items-center gap-2">
+                      <label className="flex items-center gap-2" style={{ color: '#3a256a' }}>
                         <input type="radio" value="No" {...step2Form.register('isStudent')} className="accent-primary" /> 
                         No
                       </label>
@@ -430,17 +464,17 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Gender</label>
-                  <div className="flex gap-4 items-center text-foreground">
-                    <label className="flex items-center gap-2">
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Gender</label>
+                  <div className="flex gap-4 items-center">
+                    <label className="flex items-center gap-2" style={{ color: '#3a256a' }}>
                       <input type="radio" value="Male" {...step2Form.register('gender')} className="accent-primary" /> 
                       Male
                     </label>
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-2" style={{ color: '#3a256a' }}>
                       <input type="radio" value="Female" {...step2Form.register('gender')} className="accent-primary" /> 
                       Female
                     </label>
-                    <label className="flex items-center gap-2">
+                    <label className="flex items-center gap-2" style={{ color: '#3a256a' }}>
                       <input type="radio" value="Other" {...step2Form.register('gender')} className="accent-primary" /> 
                       Other
                     </label>
@@ -450,7 +484,8 @@ export default function RegisterPage() {
                       <input 
                         {...step2Form.register('genderOther')} 
                         type="text" 
-                        className="w-full py-2 px-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50" 
+                        className="w-full py-2 px-3 border border-border rounded-xl" 
+                        style={{ background: '#f3edff', color: '#3a256a' }}
                         placeholder="Please specify your gender" 
                       />
                     </div>
@@ -467,7 +502,7 @@ export default function RegisterPage() {
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                 {/* Travel Styles */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-3">
+                  <label className="block text-sm font-medium mb-3" style={{ color: '#3a256a' }}>
                     What type of traveler are you? <span className="text-muted-foreground">(Select all that apply)</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -476,15 +511,20 @@ export default function RegisterPage() {
                         key={style.value}
                         className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                           travelStyles.includes(style.value)
-                            ? 'border-primary bg-primary/10'
-                            : 'border-border bg-card hover:border-primary/50'
+                            ? 'border-[#bca3e3] bg-[#d6c7f7]'
+                            : 'border-[#bca3e3] bg-[#ede9fe] hover:border-[#735c98]'
                         }`}
+                        style={travelStyles.includes(style.value) ? {
+                          background: '#bca3e3',
+                          borderColor: '#bca3e3',
+                          boxShadow: '0 0 0 2px #bca3e3',
+                        } : undefined}
                         onClick={() => toggleTravelStyle(style.value)}
                       >
                         <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{style.icon}</span>
+                          <span className="text-2xl" style={{ color: travelStyles.includes(style.value) ? '#735c98' : '#735c98' }}>{style.icon}</span>
                           <div>
-                            <p className="font-medium text-foreground">{style.label}</p>
+                            <p className="font-bold" style={{ color: travelStyles.includes(style.value) ? '#735c98' : '#3a256a' }}>{style.label}</p>
                           </div>
                         </div>
                       </div>
@@ -497,7 +537,7 @@ export default function RegisterPage() {
 
                 {/* Activities */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>
                     Favourite Activities <span className="text-muted-foreground">(min 2)</span>
                   </label>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -528,7 +568,8 @@ export default function RegisterPage() {
                           handleAddActivity(); 
                         } 
                       }} 
-                      className="flex-1 py-2 px-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50" 
+                      className="flex-1 py-2 px-3 border border-border rounded-xl" 
+                      style={{ background: '#f3edff', color: '#3a256a' }}
                       placeholder="Add an activity and press Enter" 
                     />
                     <button 
@@ -546,11 +587,12 @@ export default function RegisterPage() {
 
                 {/* Bio */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">Tell us about yourself</label>
+                  <label className="block text-sm font-medium mb-2" style={{ color: '#3a256a' }}>Tell us about yourself</label>
                   <textarea 
                     {...step3Form.register('bio')} 
                     rows={3} 
-                    className="w-full py-2 px-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                    className="w-full py-2 px-3 border border-border rounded-xl" 
+                    style={{ background: '#f3edff', color: '#3a256a' }}
                     placeholder="Share your travel dreams, experiences, or what you're looking for..." 
                   />
                   {step3Form.formState.errors.bio && (
@@ -573,10 +615,10 @@ export default function RegisterPage() {
                 type="button"
                 onClick={prevStep}
                 disabled={currentStep === 1}
-                className={`flex items-center px-6 py-3 rounded-xl font-medium transition-colors ${
+                className={`flex items-center px-6 py-3 rounded-xl font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-[#735c98]/60 active:shadow-2xl shadow-[0_4px_24px_0_#735c98] ${
                   currentStep === 1
                     ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
-                    : 'bg-card text-foreground border border-border hover:bg-muted'
+                    : 'bg-[#735c98] text-white border border-[#735c98] hover:bg-[#5a437a] active:bg-[#735c98]'
                 }`}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -587,7 +629,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="flex items-center gradient-primary text-white px-6 py-3 rounded-xl font-medium hover:opacity-95 transition-colors"
+                  className="flex items-center px-6 py-3 rounded-xl font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-[#735c98]/60 active:shadow-2xl shadow-[0_4px_24px_0_#735c98] bg-[#735c98] text-white border border-[#735c98] hover:bg-[#5a437a] active:bg-[#735c98]"
                 >
                   Next
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -597,7 +639,7 @@ export default function RegisterPage() {
                   type="button"
                   onClick={onSubmit}
                   disabled={loading}
-                  className="flex items-center gradient-primary text-white px-6 py-3 rounded-xl font-medium hover:opacity-95 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center px-6 py-3 rounded-xl font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-[#735c98]/60 active:shadow-2xl shadow-[0_4px_24px_0_#735c98] bg-[#735c98] text-white border border-[#735c98] hover:bg-[#5a437a] active:bg-[#735c98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </button>

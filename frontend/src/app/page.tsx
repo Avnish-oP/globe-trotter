@@ -117,6 +117,17 @@ export default function Home() {
   <svg className="absolute bottom-1/3 right-1/6 w-8 h-8 opacity-40" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M4 40l12-20 8 12 8-16 12 24z"/></svg>
   <svg className="absolute top-1/2 left-1/2 w-8 h-8 opacity-30" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="12" y="20" width="24" height="18" rx="4"/><path d="M16 20v-4a8 8 0 0 1 16 0v4"/></svg>
   <svg className="absolute bottom-1/2 right-1/2 w-8 h-8 opacity-30" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="16" y="16" width="16" height="20" rx="3"/><path d="M24 16v-6"/><circle cx="20" cy="38" r="2"/><circle cx="28" cy="38" r="2"/></svg>
+  {/* More static doodles for denser background */}
+  <svg className="absolute top-1/5 left-1/3 w-7 h-7 opacity-35" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="12" y="20" width="24" height="18" rx="4"/><path d="M16 20v-4a8 8 0 0 1 16 0v4"/></svg>
+  <svg className="absolute top-1/6 right-1/4 w-6 h-6 opacity-25" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="16" y="16" width="16" height="20" rx="3"/><path d="M24 16v-6"/><circle cx="20" cy="38" r="2"/><circle cx="28" cy="38" r="2"/></svg>
+  <svg className="absolute bottom-1/5 left-1/2 w-9 h-9 opacity-30" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M8 24a16 16 0 0 1 32 0z"/><path d="M24 24v12"/><circle cx="24" cy="40" r="2"/></svg>
+  <svg className="absolute top-1/8 right-1/8 w-8 h-8 opacity-20" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="6" y="18" width="36" height="16" rx="4"/><circle cx="14" cy="36" r="2"/><circle cx="34" cy="36" r="2"/><path d="M6 26h36"/></svg>
+  <svg className="absolute bottom-1/8 left-1/8 w-7 h-7 opacity-30" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="14" y="18" width="20" height="18" rx="6"/><path d="M24 18v-6"/><path d="M18 36v4"/><path d="M30 36v4"/></svg>
+  <svg className="absolute top-1/7 left-1/7 w-6 h-6 opacity-20" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="10" y="18" width="28" height="18" rx="4"/><circle cx="24" cy="27" r="6"/><path d="M18 18l2-4h8l2 4"/></svg>
+  <svg className="absolute bottom-1/6 right-1/5 w-8 h-8 opacity-25" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><circle cx="24" cy="24" r="10"/><path d="M24 14v10l7 7"/></svg>
+  <svg className="absolute top-1/6 left-1/8 w-7 h-7 opacity-22" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M4 40l12-20 8 12 8-16 12 24z"/></svg>
+  <svg className="absolute bottom-1/7 right-1/7 w-8 h-8 opacity-18" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="12" y="20" width="24" height="18" rx="4"/><path d="M16 20v-4a8 8 0 0 1 16 0v4"/></svg>
+  <svg className="absolute top-1/8 left-1/9 w-6 h-6 opacity-15" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="16" y="16" width="16" height="20" rx="3"/><path d="M24 16v-6"/><circle cx="20" cy="38" r="2"/><circle cx="28" cy="38" r="2"/></svg>
   {/* Animated airplane doodles */}
   <svg style={{animation: 'fly1 8s linear infinite alternate'}} className="absolute w-8 h-8 opacity-80 rotate-12" fill="none" stroke="#a78bfa" strokeWidth="2.5" viewBox="0 0 48 48"><path d="M4 24L44 4l-8 40-8-16-16-8z"/></svg>
   <svg style={{animation: 'fly2 10s linear infinite alternate'}} className="absolute w-7 h-7 opacity-70 -rotate-6" fill="none" stroke="#a78bfa" strokeWidth="2.5" viewBox="0 0 48 48"><path d="M4 24L44 4l-8 40-8-16-16-8z"/></svg>
@@ -226,7 +237,7 @@ export default function Home() {
             </div>
             {/* Subtle Feature 2 */}
             <div className="bg-white/60 backdrop-blur-lg rounded-3xl p-10 flex flex-col items-center shadow-xl border-2 border-[#bfcbe6]/20 hover:scale-105 hover:shadow-lg transition-all duration-200 animate-fade-in delay-100 shadow-[0_0_24px_4px_#735c98]">
-              <Calendar className="h-12 w-12 text-[#bfcbe6] mb-4 animate-bounce-x" />
+              <Calendar className="h-12 w-12 text-[#bfcbe6] mb-4 animate-bounce-x border-2 border-[#735c98] shadow-[0_0_15px_#735c98] rounded-full" />
               <h3 className="text-xl font-bold text-[#232946] mb-2">Smart Scheduling</h3>
               <p className="text-[#232946]/80">Organize your chaos with a calendar that vibes with your plans.</p>
             </div>
