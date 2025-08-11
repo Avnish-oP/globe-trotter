@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 // Create axios instance
 const api = axios.create({
@@ -148,6 +148,131 @@ export const searchAPI = {
   // Search activities
   searchActivities: async (cityId: string, query?: string) => {
     const response = await api.get(`/search/activities/${cityId}?q=${encodeURIComponent(query || '')}`);
+    return response.data;
+  },
+};
+
+// Dashboard API functions
+export const dashboardAPI = {
+  // Get dashboard data (overview)
+  getDashboardData: async () => {
+    const response = await api.get('/dashboard');
+    return response.data;
+  },
+
+  // Get upcoming trips
+  getUpcomingTrips: async () => {
+    const response = await api.get('/dashboard/upcoming-trips');
+    return response.data;
+  },
+
+  // Get popular cities
+  getPopularCities: async (limit: number = 5) => {
+    const response = await api.get(`/dashboard/popular-cities?limit=${limit}`);
+    return response.data;
+  },
+
+  // Get recommended destinations based on user preferences
+  getRecommendedDestinations: async () => {
+    const response = await api.get('/dashboard/recommended-destinations');
+    return response.data;
+  },
+
+  // Search public trips
+  searchPublicTrips: async (query: string) => {
+    const response = await api.get(`/dashboard/search-trips?q=${encodeURIComponent(query)}`);
+    return response.data;
+  },
+
+  // Follow a public trip (add to trip_shares)
+  followTrip: async (tripId: string) => {
+    const response = await api.post(`/dashboard/follow-trip/${tripId}`);
+    return response.data;
+  },
+};
+
+// Trips API functions
+export const tripsAPI = {
+  // Create a new trip
+  createTrip: async (tripData: {
+    title: string;
+    description?: string;
+    start_date: string;
+    end_date: string;
+    total_budget?: number;
+    currency: string;
+    destinations: Array<{
+      name: string;
+      country: string;
+      type: string;
+    }>;
+  }) => {
+    const response = await api.post('/trips', tripData);
+    return response.data;
+  },
+
+  // Get trip by ID
+  getTripById: async (tripId: string) => {
+    const response = await api.get(`/trips/${tripId}`);
+    return response.data;
+  },
+
+  // Update trip
+  updateTrip: async (tripId: string, tripData: any) => {
+    const response = await api.put(`/trips/${tripId}`, tripData);
+    return response.data;
+  },
+
+  // Delete trip
+  deleteTrip: async (tripId: string) => {
+    const response = await api.delete(`/trips/${tripId}`);
+    return response.data;
+  },
+
+  // Get user's trips
+  getUserTrips: async () => {
+    const response = await api.get('/trips/user/all');
+    return response.data;
+  },
+};
+
+// Location API functions
+export const locationAPI = {
+  // Search for locations with type identification
+  searchLocations: async (query: string) => {
+    const response = await api.get('/locations/search', {
+      params: { q: query }
+    });
+    return response.data;
+  },
+
+  // Search using external API (OpenStreetMap)
+  searchLocationsExternal: async (query: string) => {
+    const response = await api.get('/locations/external-search', {
+      params: { q: query }
+    });
+    return response.data;
+  },
+
+  // Get popular destinations
+  getPopularDestinations: async (limit: number = 20, type: string = 'all') => {
+    const response = await api.get('/locations/popular', {
+      params: { limit, type }
+    });
+    return response.data;
+  },
+
+  // Get countries
+  getCountries: async () => {
+    const response = await api.get('/locations/countries');
+    return response.data;
+  },
+
+  // Get cities by country
+  getCitiesByCountry: async (countryId: string, limit: number = 50) => {
+    const response = await api.get(`/locations/cities/${countryId}`, {
+      params: { limit }
+    });
     return response.data;
   },
 };
