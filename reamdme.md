@@ -1,7 +1,7 @@
 #Team Member
 -Avnish kumar
 -Sanskriti rai
--kavya gera
+-kavyanshi gera
 -Bimlesh
 
 Problem statement
