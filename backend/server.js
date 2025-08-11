@@ -6,6 +6,10 @@ require('dotenv').config();
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const dashboardRoutes = require('./routes/dashboard');
+const tripsRoutes = require('./routes/trips');
+const locationsRoutes = require('./routes/locations');
+const sectionsRoutes = require('./routes/sections');
 
 // Import middleware
 const { errorHandler, notFound } = require('./utils/errorHandler');
@@ -62,6 +66,10 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/trips', tripsRoutes);
+app.use('/api/locations', locationsRoutes);
+app.use('/api/sections', sectionsRoutes);
 
 // Welcome route
 app.get('/', (req, res) => {

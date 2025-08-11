@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import TripMap from '@/components/TripMap';
 import TripsFilter, { FilterState, SortOption, GroupOption } from '@/components/TripsFilter';
 import TripsList from '@/components/TripsList';
 import FloatingActionButton from '@/components/FloatingActionButton';
+import { dashboardAPI } from '@/lib/api';
 import { 
   Plane, 
   Settings,
@@ -14,12 +15,78 @@ import {
   Bell,
   User,
   Menu,
-  X
+  X,
+  Eye,
+  Share2,
+  Clock,
+  Star,
+  Heart,
+  ChevronRight,
+  Globe,
+  Filter,
+  SortAsc,
+  SortDesc,
+  ArrowUpDown,
+  Map,
+  Camera,
+  Bookmark
 } from 'lucide-react';
+
+interface DashboardStats {
+  totalTrips: number;
+  upcomingTrips: number;
+  totalBudget: number;
+  countriesVisited: number;
+}
+
+interface Trip {
+  trip_id: string;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  total_budget: number;
+  currency: string;
+  cover_image_url?: string;
+  status: string;
+  cities: string[];
+  created_by?: string;
+  creator_id?: string;
+}
+
+interface City {
+  city_id: string;
+  name: string;
+  description: string;
+  image_url?: string;
+  country_name: string;
+  country_code: string;
+  popularity_score?: number;
+}
 
 export default function DashboardPage() {
   const { user, logout, isAuthenticated, loading } = useAuth();
   const router = useRouter();
+  
+  // State management
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [upcomingTrips, setUpcomingTrips] = useState<Trip[]>([]);
+  const [previousTrips, setPreviousTrips] = useState<Trip[]>([]);
+  const [popularCities, setPopularCities] = useState<City[]>([]);
+  const [recommendedDestinations, setRecommendedDestinations] = useState<City[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Trip[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  // const [sortBy, setSortBy] = useState<'date' | 'budget' | 'popularity'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [filterBy, setFilterBy] = useState<'all' | 'domestic' | 'international'>('all');
+  const [loadingStates, setLoadingStates] = useState({
+    stats: true,
+    trips: true,
+    cities: true,
+    recommendations: true,
+    previousTrips: true
+  });
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -35,11 +102,102 @@ export default function DashboardPage() {
   const [groupBy, setGroupBy] = useState<GroupOption>('none');
 
   // Redirect if not authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push('/auth/login');
     }
   }, [isAuthenticated, loading, router]);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  const fetchDashboardData = async () => {
+    try {
+      // Fetch all dashboard data in parallel
+      const [statsRes, tripsRes, citiesRes, recommendationsRes] = await Promise.allSettled([
+        dashboardAPI.getDashboardData(),
+        dashboardAPI.getUpcomingTrips(),
+        dashboardAPI.getPopularCities(8), // Get more cities for regional section
+        dashboardAPI.getRecommendedDestinations()
+      ]);
+
+      // Handle stats
+      if (statsRes.status === 'fulfilled') {
+        setDashboardStats(statsRes.value.data);
+      }
+      setLoadingStates(prev => ({ ...prev, stats: false }));
+
+      // Handle trips
+      if (tripsRes.status === 'fulfilled') {
+        const allTrips = tripsRes.value.data;
+        const now = new Date();
+        const upcoming = allTrips.filter((trip: Trip) => new Date(trip.start_date) > now);
+        const previous = allTrips.filter((trip: Trip) => new Date(trip.end_date) < now);
+        
+        setUpcomingTrips(upcoming);
+        setPreviousTrips(previous);
+      }
+      setLoadingStates(prev => ({ ...prev, trips: false, previousTrips: false }));
+
+      // Handle cities
+      if (citiesRes.status === 'fulfilled') {
+        setPopularCities(citiesRes.value.data);
+      }
+      setLoadingStates(prev => ({ ...prev, cities: false }));
+
+      // Handle recommendations
+      if (recommendationsRes.status === 'fulfilled') {
+        setRecommendedDestinations(recommendationsRes.value.data);
+      }
+      setLoadingStates(prev => ({ ...prev, recommendations: false }));
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      // Set all loading states to false on error
+      setLoadingStates({
+        stats: false,
+        trips: false,
+        cities: false,
+        recommendations: false,
+        previousTrips: false
+      });
+    }
+  };
+
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await dashboardAPI.searchPublicTrips(query);
+      setSearchResults(response.data);
+    } catch (error) {
+      console.error('Error searching trips:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleFollowTrip = async (tripId: string) => {
+    try {
+      await dashboardAPI.followTrip(tripId);
+      // Refresh upcoming trips to show the followed trip
+      const response = await dashboardAPI.getUpcomingTrips();
+      setUpcomingTrips(response.data);
+      // Remove from search results
+      setSearchResults(prev => prev.filter(trip => trip.trip_id !== tripId));
+    } catch (error) {
+      console.error('Error following trip:', error);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -47,8 +205,22 @@ export default function DashboardPage() {
   };
 
   const handlePlanTrip = () => {
-    // TODO: Navigate to trip planning page
-    console.log('Planning a new trip...');
+    router.push('/trips/new');
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency
+    }).format(amount);
   };
 
   if (loading) {
@@ -107,6 +279,7 @@ export default function DashboardPage() {
                 </div>
               </button>
 
+              {/* Action Buttons */}
               <div className="flex items-center space-x-2">
                 <button className="p-2 text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all duration-200">
                   <Settings className="h-5 w-5" />
@@ -229,7 +402,7 @@ export default function DashboardPage() {
 
       {/* Floating Action Button */}
       {!isMapFullscreen && (
-        <FloatingActionButton onClick={handlePlanTrip} />
+        <FloatingActionButton />
       )}
     </div>
   );
