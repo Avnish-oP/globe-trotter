@@ -198,15 +198,47 @@ export const dashboardAPI = {
     return response.data;
   },
 
-  // Search public trips
-  searchPublicTrips: async (query: string) => {
-    const response = await api.get(`/dashboard/search-trips?q=${encodeURIComponent(query)}`);
+  // Search public trips with advanced filtering
+  searchPublicTrips: async (searchParams: {
+    q?: string;
+    destination?: string;
+    start_date?: string;
+    end_date?: string;
+    activity?: string;
+    budget_min?: number;
+    budget_max?: number;
+    country?: string;
+    sort?: 'created_at' | 'likes' | 'start_date' | 'budget';
+    order?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  }) => {
+    const params = new URLSearchParams();
+    Object.entries(searchParams).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, value.toString());
+      }
+    });
+    
+    const response = await api.get(`/dashboard/search-trips?${params.toString()}`);
+    return response.data;
+  },
+
+  // Get search filter options
+  getSearchFilters: async () => {
+    const response = await api.get('/dashboard/search-filters');
     return response.data;
   },
 
   // Follow a public trip (add to trip_shares)
   followTrip: async (tripId: string) => {
     const response = await api.post(`/dashboard/follow-trip/${tripId}`);
+    return response.data;
+  },
+
+  // Get popular public trips for recommendations
+  getPopularTrips: async (limit: number = 10) => {
+    const response = await api.get(`/dashboard/popular-trips?limit=${limit}`);
     return response.data;
   },
 };

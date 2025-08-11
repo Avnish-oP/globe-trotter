@@ -105,7 +105,7 @@ const sampleTrips: TripLocation[] = [
 ];
 
 const TripsList: React.FC<TripsListProps> = ({
-  trips = sampleTrips,
+  trips = [],
   searchTerm = '',
   filters,
   sortBy = 'date-desc',
