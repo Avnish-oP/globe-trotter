@@ -1,3 +1,4 @@
+// ...existing code...
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -41,72 +42,26 @@ interface TripFormData {
 }
 
 export default function CreateTripPage() {
-  const { user, isAuthenticated, loading } = useAuth();
-  const router = useRouter();
-
-  // Form state
-  const [formData, setFormData] = useState<TripFormData>({
-    title: '',
-    destination: '',
-    startDate: '',
-    endDate: '',
-    budget: '',
-    currency: 'USD',
-    selectedLocations: []
-  });
-
-  // UI state
-  const [locationQuery, setLocationQuery] = useState('');
-  const [locationSuggestions, setLocationSuggestions] = useState<LocationSuggestion[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [isSearchingLocations, setIsSearchingLocations] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, loading, router]);
-
-  // Search locations with external API as primary source
-  useEffect(() => {
-    const searchLocations = async () => {
-      if (locationQuery.length < 2) {
-        setLocationSuggestions([]);
-        setShowSuggestions(false);
-        return;
-      }
-
-      setIsSearchingLocations(true);
-      
-      try {
-        // Use external API (OpenStreetMap) as primary source for better global coverage
-        let response = await locationAPI.searchLocationsExternal(locationQuery);
-        
-        // If external API fails, fallback to our database
-        if (!response.success || response.data.length === 0) {
-          console.log('External API failed or no results, trying local database...');
-          response = await locationAPI.searchLocations(locationQuery);
-        }
-        
-        if (response.success && response.data.length > 0) {
-          const formattedSuggestions = response.data.map((location: any) => ({
-            id: location.id.toString(),
-            name: location.name,
-            country: location.country,
-            type: location.type || 'city',
-            full_name: location.full_name || `${location.name}, ${location.country}`,
-            coordinates: {
-              lat: location.latitude,
-              lng: location.longitude
-            },
-            source: location.source || 'local'
-          }));
-          setLocationSuggestions(formattedSuggestions);
-          setShowSuggestions(true);
-        } else {
+  // ...existing code...
+  return (
+    <div className="min-h-screen bg-[#ede9fe] relative overflow-hidden">
+      {/* More playful doodles for extra density, matching login page */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <svg className="absolute top-24 left-24 w-7 h-7 opacity-30 animate-bounce" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16" rx="4"/></svg>
+        <svg className="absolute bottom-24 right-24 w-7 h-7 opacity-30 animate-spin" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/></svg>
+        <svg className="absolute top-32 right-1/3 w-8 h-8 opacity-20 animate-bounce-slow" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 40 40"><polygon points="20,5 35,35 5,35"/></svg>
+        <svg className="absolute bottom-32 left-1/3 w-8 h-8 opacity-20 animate-spin-slow" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 40 40"><rect x="10" y="10" width="20" height="20" rx="6"/></svg>
+        <svg className="absolute top-1/5 left-1/8 w-6 h-6 opacity-25 animate-bounce" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="10" ry="6"/></svg>
+        <svg className="absolute bottom-1/5 right-1/8 w-6 h-6 opacity-25 animate-spin" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="6" ry="10"/></svg>
+        <svg className="absolute top-1/6 right-1/5 w-8 h-8 opacity-20 animate-bounce-slow" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 48 48"><rect x="10" y="10" width="28" height="28" rx="8"/></svg>
+        <svg className="absolute bottom-1/6 left-1/5 w-8 h-8 opacity-20 animate-spin-slow" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/></svg>
+        <svg className="absolute top-1/8 right-1/8 w-5 h-5 opacity-20 animate-bounce" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12,2 22,22 2,22"/></svg>
+        <svg className="absolute bottom-1/8 left-1/8 w-5 h-5 opacity-20 animate-spin" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/></svg>
+      </div>
+      {/* ...rest of the page... */}
+    </div>
+  );
+}
           // Final fallback to mock data
           const mockLocationSuggestions: LocationSuggestion[] = [
             { id: '1', name: 'Paris', country: 'France', type: 'city' },
@@ -264,15 +219,42 @@ export default function CreateTripPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background gradients */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-32 -left-32 h-80 w-80 rounded-full bg-gradient-to-br from-blue-100/30 to-indigo-100/30 blur-3xl animate-float-gentle" />
-        <div className="absolute top-1/4 -right-32 h-96 w-96 rounded-full bg-gradient-to-br from-violet-100/25 to-purple-100/25 blur-3xl animate-float-gentle" style={{ animationDelay: '3s' }} />
+  <div className="min-h-screen bg-[#ede9fe] relative overflow-hidden">
+      {/* Dense adventure doodle background */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+  {/* Doodles: static SVGs for background, matching landing/login/register, but even denser and more playful */}
+  {/* Extra doodles for more density */}
+  <svg className="absolute top-16 left-1/3 w-7 h-7 opacity-30 animate-bounce-slow" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="16" ry="8"/></svg>
+  <svg className="absolute bottom-16 right-1/3 w-7 h-7 opacity-30 animate-spin-slow" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 40 40"><polygon points="20,5 35,35 5,35"/></svg>
+  <svg className="absolute top-1/5 right-1/4 w-6 h-6 opacity-25 animate-bounce" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16" rx="8"/></svg>
+  <svg className="absolute bottom-1/5 left-1/4 w-6 h-6 opacity-25 animate-spin" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 32 32"><circle cx="16" cy="16" r="10"/></svg>
+  <svg className="absolute top-1/6 left-1/5 w-8 h-8 opacity-20 animate-bounce-slow" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 48 48"><rect x="10" y="10" width="28" height="28" rx="8"/></svg>
+  <svg className="absolute bottom-1/6 right-1/5 w-8 h-8 opacity-20 animate-spin-slow" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/></svg>
+  <svg className="absolute top-1/8 left-1/8 w-5 h-5 opacity-20 animate-bounce" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12,2 22,22 2,22"/></svg>
+  <svg className="absolute bottom-1/8 right-1/8 w-5 h-5 opacity-20 animate-spin" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/></svg>
+  <svg className="absolute top-1/2 right-10 w-6 h-6 opacity-25 animate-bounce" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="12" ry="6"/></svg>
+  <svg className="absolute bottom-1/2 left-10 w-6 h-6 opacity-25 animate-spin-slow" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="6" ry="12"/></svg>
+        <svg className="absolute top-10 left-10 w-8 h-8 opacity-50 animate-bounce-slow" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="12" y="20" width="24" height="18" rx="4"/><path d="M16 20v-4a8 8 0 0 1 16 0v4"/></svg>
+        <svg className="absolute bottom-10 left-10 w-8 h-8 opacity-40 animate-spin-slow" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="16" y="16" width="16" height="20" rx="3"/><path d="M24 16v-6"/><circle cx="20" cy="38" r="2"/><circle cx="28" cy="38" r="2"/></svg>
+        <svg className="absolute top-10 right-10 w-8 h-8 opacity-40 animate-bounce" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M8 24a16 16 0 0 1 32 0z"/><path d="M24 24v12"/><circle cx="24" cy="40" r="2"/></svg>
+        <svg className="absolute bottom-10 right-10 w-8 h-8 opacity-50 animate-spin" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="6" y="18" width="36" height="16" rx="4"/><circle cx="14" cy="36" r="2"/><circle cx="34" cy="36" r="2"/><path d="M6 26h36"/></svg>
+        <svg className="absolute top-1/4 left-1/6 w-8 h-8 opacity-40 animate-bounce" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="14" y="18" width="20" height="18" rx="6"/><path d="M24 18v-6"/><path d="M18 36v4"/><path d="M30 36v4"/></svg>
+        <svg className="absolute top-1/3 right-1/6 w-8 h-8 opacity-40 animate-spin-slow" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="10" y="18" width="28" height="18" rx="4"/><circle cx="24" cy="27" r="6"/><path d="M18 18l2-4h8l2 4"/></svg>
+        <svg className="absolute bottom-1/4 left-1/6 w-8 h-8 opacity-40 animate-bounce" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><circle cx="24" cy="24" r="10"/><path d="M24 14v10l7 7"/></svg>
+        <svg className="absolute bottom-1/3 right-1/6 w-8 h-8 opacity-40 animate-spin" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M4 40l12-20 8 12 8-16 12 24z"/></svg>
+        {/* Extra doodles for density and fun */}
+        <svg className="absolute top-1/2 left-1/4 w-6 h-6 opacity-30 animate-bounce" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><path d="M16 8v8l6 6"/></svg>
+        <svg className="absolute bottom-1/2 right-1/4 w-6 h-6 opacity-30 animate-spin-slow" fill="none" stroke="#735c98" strokeWidth="2" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16" rx="4"/></svg>
+        <svg className="absolute top-1/3 left-1/2 w-7 h-7 opacity-20 animate-bounce" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 40 40"><polygon points="20,5 35,35 5,35"/></svg>
+        <svg className="absolute bottom-1/3 right-1/2 w-7 h-7 opacity-20 animate-spin" fill="none" stroke="#bca3e3" strokeWidth="2" viewBox="0 0 40 40"><rect x="10" y="10" width="20" height="20" rx="6"/></svg>
+        {/* Interactive floating doodle button */}
+        <button type="button" className="fixed z-20 bottom-8 right-8 bg-[#ede9fe] border-2 border-[#735c98] rounded-full shadow-lg p-4 hover:bg-[#bca3e3] transition-all animate-bounce-slow group" title="Surprise Doodle!" onClick={() => alert('Adventure awaits! 🌍✨')}>
+          <Plane className="w-8 h-8 text-[#735c98] group-hover:rotate-12 transition-transform" />
+        </button>
       </div>
 
       {/* Header */}
-      <header className="glass-nature shadow-soft border-b border-border/50 relative z-10 backdrop-blur-md">
+  <header className="glass-nature shadow-soft border-b border-[#bca3e3]/50 relative z-10 backdrop-blur-md" style={{ background: '#ede9fecc', boxShadow: '0 8px 32px 0 #735c98cc, 0 0 0 6px #735c98' }}>
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center h-20">
             <button
@@ -286,8 +268,8 @@ export default function CreateTripPage() {
                 <Plane className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gradient-primary">Plan New Adventure</h1>
-                <p className="text-xs text-muted-foreground font-medium">Create your perfect trip</p>
+                <h1 className="text-2xl font-bold" style={{ color: '#3a256a', textShadow: '0 2px 8px #bca3e3' }}>Plan New Adventure</h1>
+                <p className="text-xs font-medium" style={{ color: '#735c98', textShadow: '0 1px 4px #ede9fe' }}>Create your perfect trip</p>
               </div>
             </div>
           </div>
@@ -295,18 +277,18 @@ export default function CreateTripPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 lg:px-8 py-8 relative z-10">
+  <main className="max-w-4xl mx-auto px-6 lg:px-8 py-8 relative z-10">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Trip Title */}
-          <div className="card-elevated bg-white/95 backdrop-blur-sm">
+          <div className="card-elevated" style={{ background: '#f8f6ffcc', boxShadow: '0 8px 32px 0 #735c98cc, 0 0 0 2px #735c98' }}>
             <div className="mb-6">
-              <h2 className="text-heading-md text-foreground font-bold mb-2">Trip Details</h2>
-              <p className="text-caption text-muted-foreground">Start by giving your adventure a memorable name</p>
+              <h2 className="text-heading-md font-bold mb-2" style={{ color: '#3a256a' }}>Trip Details</h2>
+              <p className="text-caption" style={{ color: '#735c98' }}>Start by giving your adventure a memorable name</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="title" className="block text-sm font-semibold text-foreground mb-2">
+                <label htmlFor="title" className="block text-sm font-semibold mb-2" style={{ color: '#3a256a' }}>
                   Trip Title *
                 </label>
                 <input
@@ -316,6 +298,7 @@ export default function CreateTripPage() {
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="e.g., European Summer Adventure, Tokyo Food Tour..."
                   className={`input-field w-full ${errors.title ? 'border-red-500' : ''}`}
+                  style={{ background: '#f3edff', color: '#3a256a' }}
                 />
                 {errors.title && (
                   <p className="text-sm text-red-500 mt-1">{errors.title}</p>
@@ -325,16 +308,16 @@ export default function CreateTripPage() {
           </div>
 
           {/* Destination */}
-          <div className="card-elevated bg-white/95 backdrop-blur-sm">
+          <div className="card-elevated" style={{ background: '#f8f6ffcc', boxShadow: '0 8px 32px 0 #735c98cc, 0 0 0 2px #735c98' }}>
             <div className="mb-6">
-              <h2 className="text-heading-md text-foreground font-bold mb-2">Where To?</h2>
-              <p className="text-caption text-muted-foreground">Add destinations to your trip</p>
+              <h2 className="text-heading-md font-bold mb-2" style={{ color: '#3a256a' }}>Where To?</h2>
+              <p className="text-caption" style={{ color: '#735c98' }}>Add destinations to your trip</p>
             </div>
 
             <div className="space-y-4">
               {/* Location Search */}
               <div className="relative">
-                <label htmlFor="location-search" className="block text-sm font-semibold text-foreground mb-2">
+                <label htmlFor="location-search" className="block text-sm font-semibold mb-2" style={{ color: '#3a256a' }}>
                   Search Destinations *
                 </label>
                 <div className="relative">
@@ -346,6 +329,7 @@ export default function CreateTripPage() {
                     onChange={(e) => setLocationQuery(e.target.value)}
                     placeholder="Search for cities, countries, or landmarks..."
                     className="input-field pl-12 w-full"
+                    style={{ background: '#f3edff', color: '#3a256a' }}
                   />
                   {isSearchingLocations && (
                     <div className="absolute z-10 right-4 top-1/2 -translate-y-1/2">
@@ -390,14 +374,14 @@ export default function CreateTripPage() {
               {/* Selected Locations */}
               {formData.selectedLocations.length > 0 && (
                 <div>
-                  <label className="block  text-sm font-semibold text-foreground mb-2">
+                  <label className="block  text-sm font-semibold mb-2" style={{ color: '#3a256a' }}>
                     Selected Destinations ({formData.selectedLocations.length})
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {formData.selectedLocations.map((location) => (
                       <div
                         key={location.id}
-                        className="flex items-center space-x-2 bg-primary/10 text-primary px-3 py-2 rounded-lg"
+                        className="flex items-center space-x-2 bg-[#ede9fe] text-[#735c98] px-3 py-2 rounded-lg"
                       >
                         <MapPin className="h-4 w-4" />
                         <span className="font-medium">{location.name}</span>
@@ -422,15 +406,15 @@ export default function CreateTripPage() {
           </div>
 
           {/* Duration */}
-          <div className="card-elevated z-0 bg-white/95 backdrop-blur-sm">
+          <div className="card-elevated z-0" style={{ background: '#f8f6ffcc', boxShadow: '0 8px 32px 0 #735c98cc, 0 0 0 2px #735c98' }}>
             <div className="mb-6">
-              <h2 className="text-heading-md text-foreground font-bold mb-2">When?</h2>
-              <p className="text-caption text-muted-foreground">Set your travel dates</p>
+              <h2 className="text-heading-md font-bold mb-2" style={{ color: '#3a256a' }}>When?</h2>
+              <p className="text-caption" style={{ color: '#735c98' }}>Set your travel dates</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="start-date" className="block text-sm font-semibold text-foreground mb-2">
+                <label htmlFor="start-date" className="block text-sm font-semibold mb-2" style={{ color: '#3a256a' }}>
                   Start Date *
                 </label>
                 <div className="relative">
@@ -442,6 +426,7 @@ export default function CreateTripPage() {
                     onChange={(e) => handleInputChange('startDate', e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
                     className={`input-field pl-12 w-full ${errors.startDate ? 'border-red-500' : ''}`}
+                    style={{ background: '#f3edff', color: '#3a256a' }}
                   />
                 </div>
                 {errors.startDate && (
@@ -450,7 +435,7 @@ export default function CreateTripPage() {
               </div>
 
               <div>
-                <label htmlFor="end-date" className="block text-sm font-semibold text-foreground mb-2">
+                <label htmlFor="end-date" className="block text-sm font-semibold mb-2" style={{ color: '#3a256a' }}>
                   End Date *
                 </label>
                 <div className="relative">
@@ -462,6 +447,7 @@ export default function CreateTripPage() {
                     onChange={(e) => handleInputChange('endDate', e.target.value)}
                     min={formData.startDate || new Date().toISOString().split('T')[0]}
                     className={`input-field pl-12 w-full ${errors.endDate ? 'border-red-500' : ''}`}
+                    style={{ background: '#f3edff', color: '#3a256a' }}
                   />
                 </div>
                 {errors.endDate && (
@@ -471,8 +457,8 @@ export default function CreateTripPage() {
             </div>
 
             {getTripDuration() > 0 && (
-              <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                <div className="flex items-center space-x-2 text-primary">
+              <div className="mt-4 p-4 bg-[#ede9fe] border border-[#bca3e3] rounded-lg">
+                <div className="flex items-center space-x-2" style={{ color: '#735c98' }}>
                   <Clock className="h-5 w-5" />
                   <span className="font-medium">
                     Trip Duration: {getTripDuration()} {getTripDuration() === 1 ? 'day' : 'days'}
@@ -483,15 +469,15 @@ export default function CreateTripPage() {
           </div>
 
           {/* Budget */}
-          <div className="card-elevated bg-white/95 backdrop-blur-sm">
+          <div className="card-elevated" style={{ background: '#f8f6ffcc', boxShadow: '0 8px 32px 0 #735c98cc, 0 0 0 2px #735c98' }}>
             <div className="mb-6">
-              <h2 className="text-heading-md text-foreground font-bold mb-2">Budget (Optional)</h2>
-              <p className="text-caption text-muted-foreground">Set a budget to help plan your expenses</p>
+              <h2 className="text-heading-md font-bold mb-2" style={{ color: '#3a256a' }}>Budget (Optional)</h2>
+              <p className="text-caption" style={{ color: '#735c98' }}>Set a budget to help plan your expenses</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
-                <label htmlFor="budget" className="block text-sm font-semibold text-foreground mb-2">
+                <label htmlFor="budget" className="block text-sm font-semibold mb-2" style={{ color: '#3a256a' }}>
                   Total Budget
                 </label>
                 <div className="relative">
@@ -505,12 +491,13 @@ export default function CreateTripPage() {
                     min="0"
                     step="0.01"
                     className="input-field pl-12 w-full"
+                    style={{ background: '#f3edff', color: '#3a256a' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="currency" className="block text-sm font-semibold text-foreground mb-2">
+                <label htmlFor="currency" className="block text-sm font-semibold mb-2" style={{ color: '#3a256a' }}>
                   Currency
                 </label>
                 <div className="relative">
@@ -519,6 +506,7 @@ export default function CreateTripPage() {
                     value={formData.currency}
                     onChange={(e) => handleInputChange('currency', e.target.value)}
                     className="input-field w-full appearance-none cursor-pointer"
+                    style={{ background: '#f3edff', color: '#3a256a' }}
                   >
                     <option value="USD">USD ($)</option>
                     <option value="EUR">EUR (€)</option>
