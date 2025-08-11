@@ -63,7 +63,10 @@ export default function DashboardPage() {
                 <Bell className="h-6 w-6" />
               </button>
               
-              <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => router.push('/profile')}
+                className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 transition-colors"
+              >
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">{user.name}</p>
                   <p className="text-xs text-gray-500">{user.email}</p>
@@ -74,7 +77,7 @@ export default function DashboardPage() {
                     {user.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
-              </div>
+              </button>
 
               <div className="flex items-center space-x-2">
                 <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">

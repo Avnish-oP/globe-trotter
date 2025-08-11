@@ -52,6 +52,7 @@ export const authAPI = {
     fav_activities?: string[];
     fav_places?: string[];
     travel_style?: string;
+    profile_picture_url?: string;
   }) => {
     const response = await api.post('/auth/register', userData);
     return response.data;
@@ -72,6 +73,25 @@ export const authAPI = {
   // Update user profile
   updateProfile: async (updateData: any) => {
     const response = await api.put('/auth/profile', updateData);
+    return response.data;
+  },
+
+  // Upload profile picture
+  uploadProfilePicture: async (file: File) => {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+    
+    const response = await api.post('/auth/upload-profile-picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  // Delete profile picture
+  deleteProfilePicture: async () => {
+    const response = await api.delete('/auth/delete-profile-picture');
     return response.data;
   },
 
