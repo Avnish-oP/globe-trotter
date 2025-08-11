@@ -10,6 +10,8 @@ const dashboardRoutes = require('./routes/dashboard');
 const tripsRoutes = require('./routes/trips');
 const locationsRoutes = require('./routes/locations');
 const sectionsRoutes = require('./routes/sections');
+const sharingRoutes = require('./routes/sharing');
+const discoverRoutes = require('./routes/discover');
 
 // Import middleware
 const { errorHandler, notFound } = require('./utils/errorHandler');
@@ -70,6 +72,8 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/trips', tripsRoutes);
 app.use('/api/locations', locationsRoutes);
 app.use('/api/sections', sectionsRoutes);
+app.use('/api/sharing', sharingRoutes);
+app.use('/api/discover', discoverRoutes);
 
 // Welcome route
 app.get('/', (req, res) => {

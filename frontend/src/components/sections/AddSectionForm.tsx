@@ -306,9 +306,9 @@ export default function AddSectionForm({ tripId, onSectionAdded, onCancel }: Add
           )}
         </div>
 
-        {/* Popular Places Preview */}
+        {/* Popular Places Preview - Right after location selection */}
         {showPopularPlaces && (
-          <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+          <div className="mt-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-medium text-blue-900 flex items-center">
                 <svg className="h-4 w-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,13 +333,13 @@ export default function AddSectionForm({ tripId, onSectionAdded, onCancel }: Add
             </div>
             
             {isLoadingPlaces ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+              <div className="flex items-center justify-center py-6">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
                 <span className="ml-3 text-sm text-blue-700">Discovering amazing places...</span>
               </div>
             ) : popularPlaces.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                   {popularPlaces.slice(0, 6).map((place, index) => (
                     <div 
                       key={index} 
@@ -383,9 +383,9 @@ export default function AddSectionForm({ tripId, onSectionAdded, onCancel }: Add
                   ))}
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-blue-100 rounded-lg">
+                <div className="flex items-center justify-between p-2 bg-blue-100 rounded-lg">
                   <div className="flex items-center">
-                    <svg className="h-4 w-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-3 w-3 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span className="text-xs text-blue-700 font-medium">
@@ -398,8 +398,8 @@ export default function AddSectionForm({ tripId, onSectionAdded, onCancel }: Add
                 </div>
               </>
             ) : (
-              <div className="text-center py-8">
-                <svg className="h-8 w-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center py-6">
+                <svg className="h-6 w-6 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
