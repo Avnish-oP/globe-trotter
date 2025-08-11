@@ -5,7 +5,9 @@ from typing import List, Optional
 from itinerary_pipeline import recommend_places_with_llm
 from config import settings
 import json
+import dotenv
 
+dotenv.load_dotenv()
 app = FastAPI()
 
 class SuggestionRequest(BaseModel):
