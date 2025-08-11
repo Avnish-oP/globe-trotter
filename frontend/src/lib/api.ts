@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.102.174:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance
 const api = axios.create({
@@ -293,6 +293,66 @@ export const locationAPI = {
     const response = await api.get(`/locations/cities/${countryId}`, {
       params: { limit }
     });
+    return response.data;
+  },
+};
+
+// Sections API functions
+export const sectionsAPI = {
+  // Get sections for a trip
+  getTripSections: async (tripId: string) => {
+    const response = await api.get(`/sections/trip/${tripId}/sections`);
+    return response.data;
+  },
+
+  // Create a new section
+  createSection: async (tripId: string, sectionData: {
+    title: string;
+    description?: string;
+    start_date: string;
+    end_date: string;
+    location: string;
+    budget_level?: 'low' | 'medium' | 'high';
+  }) => {
+    const response = await api.post(`/sections/trip/${tripId}/sections`, sectionData);
+    return response.data;
+  },
+
+  // Get place suggestions for a section
+  getSuggestions: async (sectionId: string) => {
+    const response = await api.post(`/sections/sections/${sectionId}/suggest-places`);
+    return response.data;
+  },
+
+  // Save selected places for a section
+  savePlaces: async (sectionId: string, places: Array<{
+    name: string;
+    lat?: number;
+    lng?: number;
+    description?: string;
+    estimated_cost?: string;
+    popularity?: string;
+  }>) => {
+    const response = await api.post(`/sections/sections/${sectionId}/places`, { places });
+    return response.data;
+  },
+
+  // Update a section
+  updateSection: async (sectionId: string, updates: Partial<{
+    title: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    location: string;
+    budget_level: 'low' | 'medium' | 'high';
+  }>) => {
+    const response = await api.put(`/sections/sections/${sectionId}`, updates);
+    return response.data;
+  },
+
+  // Delete a section
+  deleteSection: async (sectionId: string) => {
+    const response = await api.delete(`/sections/sections/${sectionId}`);
     return response.data;
   },
 };
