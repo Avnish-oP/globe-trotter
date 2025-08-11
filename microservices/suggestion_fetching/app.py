@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional
-from itinerary_pipeline import recommend_places_with_llm
+from itinerary_pipeline import ItineraryPipeline
 from config import settings
 import json
 import dotenv
@@ -15,6 +15,9 @@ class SuggestionRequest(BaseModel):
     budget: str
     experiences: List[str]
 
+# Initialize the pipeline once
+pipeline = ItineraryPipeline(groq_key=settings.GROQ_API_KEY)
+
 @app.post("/suggestions")
 def get_suggestions(req: SuggestionRequest):
     user_input = {
@@ -23,7 +26,7 @@ def get_suggestions(req: SuggestionRequest):
         "experiences": req.experiences
     }
     try:
-        suggestions = recommend_places_with_llm(user_input, settings.GROQ_API_KEY)
+        suggestions = pipeline.recommend_places(user_input, min_places=20, match_ratio=0.7)
         return JSONResponse(content={"suggestions": json.loads(json.dumps(suggestions))})
     except Exception as e:
         print("Error:", e)
