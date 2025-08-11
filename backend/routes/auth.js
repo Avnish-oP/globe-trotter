@@ -23,6 +23,8 @@ const { asyncHandler } = require('../utils/errorHandler');
  * @access Public
  */
 router.post('/register', validateRegistration, asyncHandler(async (req, res) => {
+  console.log('📝 Registration request received:', JSON.stringify(req.body, null, 2));
+  
   const {
     name,
     email,

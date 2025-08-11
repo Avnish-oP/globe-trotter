@@ -7,39 +7,65 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { Mail, User, MapPin, Heart, Plane, Phone, Globe, Tag, Plus } from 'lucide-react';
+import { Mail, User, MapPin, Heart, Plane, Phone, Globe, Tag, Plus, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 
+const predefinedAvatars = [
+  { id: 1, url: '/avatars/doodle1.png', name: 'Doodle 1', emoji: '😊' },
+  { id: 2, url: '/avatars/doodle2.png', name: 'Doodle 2', emoji: '🌟' },
+  { id: 3, url: '/avatars/doodle3.png', name: 'Doodle 3', emoji: '🎨' },
+  { id: 4, url: '/avatars/doodle4.png', name: 'Doodle 4', emoji: '🚀' },
+  { id: 5, url: '/avatars/doodle5.png', name: 'Doodle 5', emoji: '🌺' },
+  { id: 6, url: '/avatars/doodle6.png', name: 'Doodle 6', emoji: '⚡' },
+];
 
 const countryList = [
   'United States', 'India', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'France', 'Japan', 'China', 'Brazil', 'South Africa', 'Other',
 ];
 
-const registerSchema = z.object({
+// Step 1: Basic Info
+const step1Schema = z.object({
   name: z.string().min(2, 'Full Name is required'),
   email: z.string().email('Please enter a valid email address'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters long')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/, 'Password must contain uppercase, lowercase, number, and special character'),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
   phone: z.string().optional().refine(val => !val || /^\d{7,15}$/.test(val), { message: 'Phone must be numeric and 7-15 digits' }),
-  age: z.string().refine(val => /^[1-9][0-9]*$/.test(val), { message: 'Age is required and must be a positive integer' }),
+  city: z.string().min(2, 'City is required'),
+  country: z.string().min(2, 'Country is required'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+// Step 2: Personal Details
+const step2Schema = z.object({
+  selectedAvatar: z.coerce.number().min(1, 'Please select an avatar'),
+  age: z.coerce.number().int().min(13, 'Age must be at least 13'),
   gender: z.enum(['Male', 'Female', 'Other']),
   genderOther: z.string().optional(),
   isStudent: z.enum(['Yes', 'No']),
-  city: z.string().min(2, 'City is required'),
-  country: z.string().min(2, 'Country is required'),
-  favPlaces: z.array(z.string()).min(2, 'Add at least 2 favourite cities/countries'),
-  favActivities: z.array(z.string()).min(2, 'Add at least 2 favourite activities'),
-  bio: z.string().min(1, 'User bio is required'),
-  profilePicture: z.any().optional(),
 });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
+// Step 3: Travel Preferences
+const step3Schema = z.object({
+  travelStyles: z.array(z.string()).min(1, 'Select at least one travel style'),
+  favActivities: z.array(z.string()).min(2, 'Add at least 2 favourite activities'),
+  bio: z.string().min(1, 'User bio is required'),
+});
+
+type Step1Data = z.infer<typeof step1Schema>;
+type Step2Data = z.infer<typeof step2Schema>;
+type Step3Data = z.infer<typeof step3Schema>;
 
 const TRAVEL_STYLES = [
-  { value: 'budget', label: 'Budget', icon: '💰' },
-  { value: 'luxury', label: 'Luxury', icon: '✨' },
-  { value: 'adventure', label: 'Adventure', icon: '🏔️' },
-  { value: 'cultural', label: 'Cultural', icon: '🏛️' },
-  { value: 'relaxation', label: 'Relaxation', icon: '🏖️' },
-  { value: 'business', label: 'Business', icon: '💼' },
-  { value: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦' },
+  { value: 'budget', label: 'Budget Explorer', icon: '🌿', color: 'emerald' },
+  { value: 'luxury', label: 'Luxury Seeker', icon: '✨', color: 'purple' },
+  { value: 'adventure', label: 'Adventure Lover', icon: '🏔️', color: 'orange' },
+  { value: 'cultural', label: 'Culture Enthusiast', icon: '🏛️', color: 'blue' },
+  { value: 'relaxation', label: 'Wellness Traveler', icon: '🧘', color: 'teal' },
+  { value: 'business', label: 'Business Nomad', icon: '💼', color: 'gray' },
+  { value: 'family', label: 'Family Explorer', icon: '👨‍👩‍👧‍👦', color: 'rose' },
 ];
 
 const ACTIVITY_OPTIONS = [
@@ -50,320 +76,560 @@ const ACTIVITY_OPTIONS = [
 export default function RegisterPage() {
   const router = useRouter();
   const { register: registerUser } = useAuth();
+  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [favPlaces, setFavPlaces] = useState<string[]>([]);
-  const [favActivities, setFavActivities] = useState<string[]>([]);
-  const [placeInput, setPlaceInput] = useState('');
   const [activityInput, setActivityInput] = useState('');
-  const [profilePreview, setProfilePreview] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    formState: { errors, isValid },
-    setError,
-    clearErrors,
-    watch,
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+  // Step 1 Form
+  const step1Form = useForm<Step1Data>({
+    resolver: zodResolver(step1Schema),
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      phone: '',
+      city: '',
+      country: '',
+    },
+  });
+
+  // Step 2 Form  
+  const step2Form = useForm<Step2Data>({
+    resolver: zodResolver(step2Schema),
     mode: 'onChange',
     defaultValues: {
       gender: 'Male',
       isStudent: 'No',
-      favPlaces: [],
-      favActivities: [],
+      selectedAvatar: 1,
     },
   });
 
-  // Watch gender for dynamic field
-  const genderValue = watch('gender');
+  // Step 3 Form
+  const step3Form = useForm<Step3Data>({
+    resolver: zodResolver(step3Schema),
+    mode: 'onChange',
+    defaultValues: {
+      travelStyles: [],
+      favActivities: [],
+      bio: '',
+    },
+  });
+
+  // Watch for dynamic fields
+  const genderValue = step2Form.watch('gender');
+  const travelStyles = step3Form.watch('travelStyles') || [];
+  const favActivities = step3Form.watch('favActivities') || [];
 
   React.useEffect(() => {
-    if (genderValue !== 'Other') setValue('genderOther', '');
-  }, [genderValue, setValue]);
+    if (genderValue !== 'Other') step2Form.setValue('genderOther', '');
+  }, [genderValue, step2Form]);
 
-  // Profile picture preview handler
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setValue('profilePicture', file);
-      setProfilePreview(URL.createObjectURL(file));
-    } else {
-      setValue('profilePicture', undefined);
-      setProfilePreview(null);
-    }
+  // Handle travel style selection
+  const toggleTravelStyle = (style: string) => {
+    const current = travelStyles;
+    const updated = current.includes(style) 
+      ? current.filter(s => s !== style)
+      : [...current, style];
+    step3Form.setValue('travelStyles', updated, { shouldValidate: true });
   };
 
-  // Tag input handlers
-  const handleAddPlace = () => {
-    if (placeInput.trim() && !favPlaces.includes(placeInput.trim())) {
-      const updated = [...favPlaces, placeInput.trim()];
-      setFavPlaces(updated);
-      setValue('favPlaces', updated, { shouldValidate: true });
-      setPlaceInput('');
-      clearErrors('favPlaces');
-    }
-  };
-  const handleRemovePlace = (place: string) => {
-    const updated = favPlaces.filter(p => p !== place);
-    setFavPlaces(updated);
-    setValue('favPlaces', updated, { shouldValidate: true });
-  };
+  // Handle activity management
   const handleAddActivity = () => {
     if (activityInput.trim() && !favActivities.includes(activityInput.trim())) {
       const updated = [...favActivities, activityInput.trim()];
-      setFavActivities(updated);
-      setValue('favActivities', updated, { shouldValidate: true });
+      step3Form.setValue('favActivities', updated, { shouldValidate: true });
       setActivityInput('');
-      clearErrors('favActivities');
     }
   };
+
   const handleRemoveActivity = (activity: string) => {
     const updated = favActivities.filter(a => a !== activity);
-    setFavActivities(updated);
-    setValue('favActivities', updated, { shouldValidate: true });
+    step3Form.setValue('favActivities', updated, { shouldValidate: true });
   };
 
-  const onSubmit = async (data: RegisterFormData) => {
+  // Navigation
+  const nextStep = async () => {
+    let isValid = false;
+    
+    if (currentStep === 1) {
+      isValid = await step1Form.trigger();
+      if (isValid) setCurrentStep(2);
+    } else if (currentStep === 2) {
+      isValid = await step2Form.trigger();
+      if (isValid) setCurrentStep(3);
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep(prev => Math.max(1, prev - 1));
+  };
+
+  // Final submission
+  const onSubmit = async () => {
+    const isStep3Valid = await step3Form.trigger();
+    if (!isStep3Valid) return;
+
     setLoading(true);
     try {
-      // Prepare form data for file upload if needed
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'favPlaces' || key === 'favActivities') {
-          (value as string[]).forEach((v) => formData.append(key, v));
-        } else if (key === 'profilePicture' && value instanceof File) {
-          formData.append('profilePicture', value);
-        } else {
-          formData.append(key, value as string);
-        }
-      });
-  const genderValue = data.gender === 'Other' ? (data.genderOther || '') : data.gender;
-  formData.set('gender', genderValue);
-  formData.set('age', String(data.age));
+      const step1Data = step1Form.getValues();
+      const step2Data = step2Form.getValues();
+      const step3Data = step3Form.getValues();
 
-      // You may need to update registerUser to accept FormData if backend supports file upload
-      await registerUser(formData);
+      console.log('🔍 Step 1 Data:', step1Data);
+      console.log('🔍 Step 2 Data:', step2Data);
+      console.log('🔍 Step 3 Data:', step3Data);
+
+      // Map frontend data to backend expected format
+      const registrationData = {
+        name: step1Data.name,
+        email: step1Data.email,
+        password: step1Data.password,
+        country_origin: step1Data.country,
+        fav_activities: step3Data.favActivities,
+        fav_places: [], // We don't collect this in the form currently
+        travel_style: step3Data.travelStyles[0] || 'budget', // Take first travel style or default to budget
+      };
+
+      console.log('🔍 Mapped Registration Data:', registrationData);
+
+      await registerUser(registrationData);
       router.push('/dashboard');
     } catch (error: any) {
-      setError('root', { message: error.message });
+      step3Form.setError('root', { message: error.message });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-2">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="p-6 sm:p-10">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <Plane className="h-8 w-8 text-blue-600 mr-2" />
-              <h1 className="text-3xl font-bold text-gray-900">GlobeTrotter</h1>
-            </div>
-            <p className="text-gray-600">Sign up and start your journey!</p>
-          </div>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background gradients */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-gradient-to-br from-emerald-200/30 to-teal-200/30 blur-3xl animate-float" />
+        <div className="absolute top-1/3 -right-24 h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-purple-200/25 to-indigo-200/25 blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-24 left-1/3 h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-blue-200/20 to-cyan-200/20 blur-3xl animate-float" style={{ animationDelay: '4s' }} />
+      </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
-            {/* Profile Picture (Optional, Centered Avatar) */}
-            <div className="flex flex-col items-center mb-6">
-              <div className="relative group">
-                <input
-                  id="profilePictureInput"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleProfileChange}
-                  className="hidden"
-                />
-                <label htmlFor="profilePictureInput" className="cursor-pointer">
-                  <span className="relative block">
-                    {profilePreview ? (
-                      <img
-                        src={profilePreview}
-                        alt="Profile Preview"
-                        className="h-24 w-24 object-cover rounded-full border-2 border-blue-400 shadow"
-                      />
-                    ) : (
-                      <span className="flex items-center justify-center h-24 w-24 rounded-full bg-blue-100 border-2 border-blue-300 text-blue-400 text-5xl">
-                        <User className="h-12 w-12" />
-                      </span>
-                    )}
-                    <span className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1 border-2 border-white shadow-lg group-hover:bg-blue-700 transition-colors">
-                      <Plus className="h-5 w-5 text-white" />
-                    </span>
-                  </span>
-                </label>
+      <div className="min-h-screen flex items-center justify-center p-3 sm:p-6">
+        <div className="w-full max-w-2xl glass-nature rounded-3xl shadow-2xl border border-border/40 overflow-hidden backdrop-blur-xl">
+          <div className="p-6 sm:p-10">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center mb-4">
+                <Plane className="h-8 w-8 text-primary mr-2" />
+                <h1 className="text-3xl font-bold text-foreground">GlobeTrotter</h1>
               </div>
-              <span className="text-xs text-gray-500 mt-2">Profile Picture (Optional)</span>
+              <p className="text-muted-foreground">Sign up and start your journey!</p>
             </div>
-            {/* Error Message */}
-            {errors.root && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-600 text-sm">{errors.root.message}</p>
+
+            {/* Progress Bar */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                {[1, 2, 3].map((step) => (
+                  <div key={step} className="flex items-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                      currentStep >= step 
+                        ? 'bg-primary border-primary text-white' 
+                        : 'border-border bg-background text-muted-foreground'
+                    }`}>
+                      {currentStep > step ? <Check className="h-5 w-5" /> : step}
+                    </div>
+                    {step < 3 && (
+                      <div className={`w-16 h-1 mx-2 transition-colors duration-300 ${
+                        currentStep > step ? 'bg-primary' : 'bg-border'
+                      }`} />
+                    )}
+                  </div>
+                ))}
               </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Step {currentStep} of 3: {
+                    currentStep === 1 ? 'Basic Information' :
+                    currentStep === 2 ? 'Personal Details' :
+                    'Travel Preferences'
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* Step 1: Basic Information */}
+            {currentStep === 1 && (
+              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <input 
+                        {...step1Form.register('name')} 
+                        type="text" 
+                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                        placeholder="Enter your full name" 
+                      />
+                    </div>
+                    {step1Form.formState.errors.name && (
+                      <p className="mt-1 text-sm text-destructive">{step1Form.formState.errors.name.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <input 
+                        {...step1Form.register('email')} 
+                        type="email" 
+                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                        placeholder="Enter your email" 
+                      />
+                    </div>
+                    {step1Form.formState.errors.email && (
+                      <p className="mt-1 text-sm text-destructive">{step1Form.formState.errors.email.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Password</label>
+                  <div className="relative">
+                    <input 
+                      {...step1Form.register('password')} 
+                      type="password" 
+                      className="w-full py-3 px-4 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                      placeholder="Enter a strong password" 
+                    />
+                  </div>
+                  {step1Form.formState.errors.password && (
+                    <p className="mt-1 text-sm text-destructive">{step1Form.formState.errors.password.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Confirm Password</label>
+                  <div className="relative">
+                    <input 
+                      {...step1Form.register('confirmPassword')} 
+                      type="password" 
+                      className="w-full py-3 px-4 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                      placeholder="Confirm your password" 
+                    />
+                  </div>
+                  {step1Form.formState.errors.confirmPassword && (
+                    <p className="mt-1 text-sm text-destructive">{step1Form.formState.errors.confirmPassword.message}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Phone Number <span className="text-muted-foreground">(Optional)</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <input 
+                        {...step1Form.register('phone')} 
+                        type="tel" 
+                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                        placeholder="e.g. 9876543210" 
+                      />
+                    </div>
+                    {step1Form.formState.errors.phone && (
+                      <p className="mt-1 text-sm text-destructive">{step1Form.formState.errors.phone.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">City</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <input 
+                        {...step1Form.register('city')} 
+                        type="text" 
+                        className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                        placeholder="Enter your city" 
+                      />
+                    </div>
+                    {step1Form.formState.errors.city && (
+                      <p className="mt-1 text-sm text-destructive">{step1Form.formState.errors.city.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Country</label>
+                  <div className="relative">
+                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <select 
+                      {...step1Form.register('country')} 
+                      className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors"
+                    >
+                      <option value="">Select your country</option>
+                      {countryList.map((country) => (
+                        <option key={country} value={country}>{country}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {step1Form.formState.errors.country && (
+                    <p className="mt-1 text-sm text-destructive">{step1Form.formState.errors.country.message}</p>
+                  )}
+                </div>
+              </form>
             )}
 
-            {/* Row 1: Name, Email */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-700" />
-                  <input {...register('name')} type="text" className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Enter your full name" />
+            {/* Step 2: Personal Details */}
+            {currentStep === 2 && (
+              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                {/* Avatar Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-4">Choose your avatar</label>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                    {predefinedAvatars.map((avatar) => (
+                      <div
+                        key={avatar.id}
+                        className={`relative cursor-pointer group transition-all duration-200 ${
+                          Number(step2Form.watch('selectedAvatar')) === avatar.id
+                            ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                            : 'hover:ring-2 hover:ring-primary/50 hover:ring-offset-2 hover:ring-offset-background'
+                        }`}
+                        onClick={() => step2Form.setValue('selectedAvatar', avatar.id, { shouldValidate: true })}
+                      >
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-2xl border-2 border-primary/30 hover:border-primary/50 transition-colors">
+                          {avatar.emoji}
+                        </div>
+                        {Number(step2Form.watch('selectedAvatar')) === avatar.id && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                            <Check className="h-3 w-3 text-white" />
+                          </div>
+                        )}
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-1">
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">{avatar.name}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {step2Form.formState.errors.selectedAvatar && (
+                    <p className="mt-1 text-sm text-destructive">{step2Form.formState.errors.selectedAvatar.message}</p>
+                  )}
                 </div>
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input {...register('email')} type="email" className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Enter your email" />
-                </div>
-                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
-              </div>
-            </div>
 
-            {/* Row 2: Phone, Age */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number <span className="text-gray-400">(Optional)</span></label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input {...register('phone')} type="tel" inputMode="numeric" className="w-full pl-10 pr-4 py-3 border
-                   border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="e.g. 9876543210" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Age</label>
+                    <input 
+                      {...step2Form.register('age')} 
+                      type="number" 
+                      min={13} 
+                      className="w-full py-3 px-4 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                      placeholder="Enter your age" 
+                    />
+                    {step2Form.formState.errors.age && (
+                      <p className="mt-1 text-sm text-destructive">{step2Form.formState.errors.age.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Are you a student?</label>
+                    <div className="flex gap-4 items-center text-foreground mt-3">
+                      <label className="flex items-center gap-2">
+                        <input type="radio" value="Yes" {...step2Form.register('isStudent')} className="accent-primary" /> 
+                        Yes
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="radio" value="No" {...step2Form.register('isStudent')} className="accent-primary" /> 
+                        No
+                      </label>
+                    </div>
+                    {step2Form.formState.errors.isStudent && (
+                      <p className="mt-1 text-sm text-destructive">{step2Form.formState.errors.isStudent.message}</p>
+                    )}
+                  </div>
                 </div>
-                {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
-                <div className="relative">
-                  <input {...register('age')} type="number" min={1} className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Enter your age" />
-                </div>
-                {errors.age && <p className="mt-1 text-sm text-red-600">{errors.age.message}</p>}
-              </div>
-            </div>
 
-            {/* Row 3: Gender, Student */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                <div className="flex gap-4 items-center">
-                  <label className="flex items-center gap-1">
-                    <input type="radio" value="Male" {...register('gender')} className="accent-blue-600" /> Male
-                  </label>
-                  <label className="flex items-center gap-1">
-                    <input type="radio" value="Female" {...register('gender')} className="accent-blue-600" /> Female
-                  </label>
-                  <label className="flex items-center gap-1">
-                    <input type="radio" value="Other" {...register('gender')} className="accent-blue-600" /> Other
-                  </label>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Gender</label>
+                  <div className="flex gap-4 items-center text-foreground">
+                    <label className="flex items-center gap-2">
+                      <input type="radio" value="Male" {...step2Form.register('gender')} className="accent-primary" /> 
+                      Male
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input type="radio" value="Female" {...step2Form.register('gender')} className="accent-primary" /> 
+                      Female
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input type="radio" value="Other" {...step2Form.register('gender')} className="accent-primary" /> 
+                      Other
+                    </label>
+                  </div>
+                  {genderValue === 'Other' && (
+                    <div className="mt-3">
+                      <input 
+                        {...step2Form.register('genderOther')} 
+                        type="text" 
+                        className="w-full py-2 px-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50" 
+                        placeholder="Please specify your gender" 
+                      />
+                    </div>
+                  )}
+                  {step2Form.formState.errors.gender && (
+                    <p className="mt-1 text-sm text-destructive">{step2Form.formState.errors.gender.message}</p>
+                  )}
                 </div>
-                {genderValue === 'Other' && (
-                  <div className="mt-2 transition-all duration-300">
-                    <input {...register('genderOther')} type="text" className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Please specify your gender" />
+              </form>
+            )}
+
+            {/* Step 3: Travel Preferences */}
+            {currentStep === 3 && (
+              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                {/* Travel Styles */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-3">
+                    What type of traveler are you? <span className="text-muted-foreground">(Select all that apply)</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {TRAVEL_STYLES.map((style) => (
+                      <div
+                        key={style.value}
+                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                          travelStyles.includes(style.value)
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border bg-card hover:border-primary/50'
+                        }`}
+                        onClick={() => toggleTravelStyle(style.value)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-2xl">{style.icon}</span>
+                          <div>
+                            <p className="font-medium text-foreground">{style.label}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {step3Form.formState.errors.travelStyles && (
+                    <p className="mt-1 text-sm text-destructive">{step3Form.formState.errors.travelStyles.message}</p>
+                  )}
+                </div>
+
+                {/* Activities */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Favourite Activities <span className="text-muted-foreground">(min 2)</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {favActivities.map((activity) => (
+                      <span 
+                        key={activity} 
+                        className="flex items-center bg-accent/10 text-accent px-3 py-1 rounded-full text-xs font-medium border border-accent/20"
+                      >
+                        {activity}
+                        <button 
+                          type="button" 
+                          className="ml-2 text-accent hover:text-destructive" 
+                          onClick={() => handleRemoveActivity(activity)}
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={activityInput} 
+                      onChange={e => setActivityInput(e.target.value)} 
+                      onKeyDown={e => { 
+                        if (e.key === 'Enter') { 
+                          e.preventDefault(); 
+                          handleAddActivity(); 
+                        } 
+                      }} 
+                      className="flex-1 py-2 px-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50" 
+                      placeholder="Add an activity and press Enter" 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={handleAddActivity} 
+                      className="gradient-primary text-white px-3 py-2 rounded-xl hover:opacity-95 transition-colors"
+                    >
+                      <Tag className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {step3Form.formState.errors.favActivities && (
+                    <p className="mt-1 text-sm text-destructive">{step3Form.formState.errors.favActivities.message}</p>
+                  )}
+                </div>
+
+                {/* Bio */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Tell us about yourself</label>
+                  <textarea 
+                    {...step3Form.register('bio')} 
+                    rows={3} 
+                    className="w-full py-2 px-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
+                    placeholder="Share your travel dreams, experiences, or what you're looking for..." 
+                  />
+                  {step3Form.formState.errors.bio && (
+                    <p className="mt-1 text-sm text-destructive">{step3Form.formState.errors.bio.message}</p>
+                  )}
+                </div>
+
+                {/* Error Message */}
+                {step3Form.formState.errors.root && (
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                    <p className="text-destructive text-sm">{step3Form.formState.errors.root.message}</p>
                   </div>
                 )}
-                {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender.message}</p>}
-                {errors.genderOther && <p className="mt-1 text-sm text-red-600">{errors.genderOther.message}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Are you a student?</label>
-                <div className="flex gap-4 items-center">
-                  <label className="flex items-center gap-1">
-                    <input type="radio" value="Yes" {...register('isStudent')} className="accent-blue-600" /> Yes
-                  </label>
-                  <label className="flex items-center gap-1">
-                    <input type="radio" value="No" {...register('isStudent')} className="accent-blue-600" /> No
-                  </label>
-                </div>
-                {errors.isStudent && <p className="mt-1 text-sm text-red-600">{errors.isStudent.message}</p>}
-              </div>
-            </div>
+              </form>
+            )}
 
-            {/* Row 4: City, Country */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input {...register('city')} type="text" className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Enter your city" />
-                </div>
-                {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <select {...register('country')} className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                    <option value="">Select your country</option>
-                    {countryList.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-                {errors.country && <p className="mt-1 text-sm text-red-600">{errors.country.message}</p>}
-              </div>
-            </div>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-8">
+              <button
+                type="button"
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className={`flex items-center px-6 py-3 rounded-xl font-medium transition-colors ${
+                  currentStep === 1
+                    ? 'opacity-50 cursor-not-allowed bg-muted text-muted-foreground'
+                    : 'bg-card text-foreground border border-border hover:bg-muted'
+                }`}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </button>
 
-            {/* Row 5: Favourite Cities/Countries (tags) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Favourite Cities/Countries <span className="text-gray-400">(min 2)</span></label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {favPlaces.map((place) => (
-                  <span key={place} className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
-                    {place}
-                    <button type="button" className="ml-2 text-blue-500 hover:text-red-500" onClick={() => handleRemovePlace(place)}>&times;</button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input type="text" value={placeInput} onChange={e => setPlaceInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddPlace(); } }} className="flex-1 py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add a city or country and press Enter" />
-                <button type="button" onClick={handleAddPlace} className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors"><Tag className="h-4 w-4" /></button>
-              </div>
-              {errors.favPlaces && <p className="mt-1 text-sm text-red-600">{errors.favPlaces.message}</p>}
+              {currentStep < 3 ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="flex items-center gradient-primary text-white px-6 py-3 rounded-xl font-medium hover:opacity-95 transition-colors"
+                >
+                  Next
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onSubmit}
+                  disabled={loading}
+                  className="flex items-center gradient-primary text-white px-6 py-3 rounded-xl font-medium hover:opacity-95 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Creating Account...' : 'Create Account'}
+                </button>
+              )}
             </div>
-
-            {/* Row 6: Favourite Activities (tags) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Favourite Activities <span className="text-gray-400">(min 2)</span></label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {favActivities.map((activity) => (
-                  <span key={activity} className="flex items-center bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
-                    {activity}
-                    <button type="button" className="ml-2 text-indigo-500 hover:text-red-500" onClick={() => handleRemoveActivity(activity)}>&times;</button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input type="text" value={activityInput} onChange={e => setActivityInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddActivity(); } }} className="flex-1 py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add an activity and press Enter (e.g., skydiving)" />
-                <button type="button" onClick={handleAddActivity} className="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition-colors"><Tag className="h-4 w-4" /></button>
-              </div>
-              {errors.favActivities && <p className="mt-1 text-sm text-red-600">{errors.favActivities.message}</p>}
-            </div>
-
-            {/* Row 7: User Bio */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">User Bio</label>
-              <textarea {...register('bio')} rows={3} className="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="Tell us about yourself, your travel dreams, etc." />
-              {errors.bio && <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>}
-            </div>
-
-            {/* Submit Button */}
-            <button type="submit" disabled={loading || !isValid} className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
 
             {/* Login Link */}
-            <div className="text-center">
-              <p className="text-gray-600">
+            <div className="text-center mt-6">
+              <p className="text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-semibold">Sign in</Link>
+                <Link href="/auth/login" className="text-primary hover:opacity-90 font-semibold">
+                  Sign in
+                </Link>
               </p>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

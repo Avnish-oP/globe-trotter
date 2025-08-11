@@ -21,7 +21,6 @@ export default function Home() {
   const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
-  // Redirect authenticated users to dashboard
   React.useEffect(() => {
     if (!loading && isAuthenticated) {
       router.push('/dashboard');
@@ -30,38 +29,36 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     );
   }
 
-  if (isAuthenticated) {
-    return null; // Will redirect to dashboard
-  }
+  if (isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background gradients */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-32 -left-24 h-[26rem] w-[26rem] rounded-full bg-gradient-to-br from-emerald-200/30 to-teal-200/30 blur-3xl animate-float" />
+        <div className="absolute top-1/4 -right-24 h-[30rem] w-[30rem] rounded-full bg-gradient-to-br from-purple-200/25 to-indigo-200/25 blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-24 left-1/3 h-[28rem] w-[28rem] rounded-full bg-gradient-to-br from-blue-200/20 to-cyan-200/20 blur-3xl animate-float" style={{ animationDelay: '4s' }} />
+      </div>
+
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
+      <nav className="glass-nature backdrop-blur-xl border-b border-border/40 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Plane className="h-8 w-8 text-blue-600 mr-2" />
-              <span className="text-2xl font-bold text-gray-900">GlobeTrotter</span>
+              <Plane className="h-7 w-7 text-primary mr-2" />
+              <span className="text-2xl font-bold text-foreground">GlobeTrotter</span>
             </div>
-            
-            <div className="flex items-center space-x-4">
-              <Link 
-                href="/auth/login"
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-              >
+            <div className="flex items-center space-x-3">
+              <Link href="/auth/login" className="text-foreground/80 hover:text-foreground font-medium transition-colors">
                 Sign In
               </Link>
-              <Link 
-                href="/auth/register"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
+              <Link href="/auth/register" className="gradient-primary text-white px-4 py-2 rounded-xl font-medium shadow hover:opacity-95 transition-colors">
                 Get Started
               </Link>
             </div>
@@ -71,29 +68,19 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Plan Your Perfect
-              <span className="text-blue-600 block">Travel Adventure</span>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground mb-6">
+              Discover. Plan. <span className="text-gradient-primary">Journey.</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Create customized multi-city itineraries, discover amazing destinations, 
-              assign travel dates and budgets, and share your plans with friends.
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
+              Build beautiful multi-city itineraries, balance budget and time, and collect memories that last. Designed for modern travelers.
             </p>
-            
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link 
-                href="/auth/register"
-                className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors inline-flex items-center justify-center"
-              >
-                Start Planning
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Link href="/auth/register" className="gradient-primary text-white px-8 py-4 rounded-2xl font-semibold text-lg inline-flex items-center justify-center shadow-lg">
+                Start Planning <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
-              <Link 
-                href="/auth/login"
-                className="bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-blue-600 transition-colors"
-              >
+              <Link href="/auth/login" className="bg-card text-foreground px-8 py-4 rounded-2xl font-semibold text-lg border border-border hover:bg-muted transition-colors">
                 Sign In
               </Link>
             </div>
@@ -101,155 +88,108 @@ export default function Home() {
         </div>
 
         {/* Floating Cards */}
-        <div className="absolute top-20 left-10 hidden lg:block">
-          <div className="bg-white p-4 rounded-xl shadow-lg transform rotate-3">
-            <MapPin className="h-8 w-8 text-red-500 mb-2" />
-            <p className="font-semibold">Tokyo, Japan</p>
-            <p className="text-sm text-gray-500">5 days • $1,200</p>
+        <div className="absolute top-24 left-8 hidden lg:block">
+          <div className="glass-nature p-4 rounded-2xl shadow-lg rotate-3 border border-border">
+            <MapPin className="h-8 w-8 text-rose-500 mb-2" />
+            <p className="font-semibold text-foreground">Tokyo, Japan</p>
+            <p className="text-sm text-muted-foreground">5 days • $1,200</p>
           </div>
         </div>
-        
-        <div className="absolute top-40 right-10 hidden lg:block">
-          <div className="bg-white p-4 rounded-xl shadow-lg transform -rotate-3">
-            <Calendar className="h-8 w-8 text-blue-500 mb-2" />
-            <p className="font-semibold">Trip Timeline</p>
-            <p className="text-sm text-gray-500">Mar 15 - 20, 2025</p>
+        <div className="absolute top-48 right-8 hidden lg:block">
+          <div className="glass-nature p-4 rounded-2xl shadow-lg -rotate-3 border border-border">
+            <Calendar className="h-8 w-8 text-primary mb-2" />
+            <p className="font-semibold text-foreground">Trip Timeline</p>
+            <p className="text-sm text-muted-foreground">Mar 15 - 20, 2025</p>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white">
+      <section className="py-20 bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need to Plan Amazing Trips
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Our comprehensive platform makes travel planning simple, organized, and fun.
-            </p>
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Everything You Need to Plan Amazing Trips</h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">A comprehensive platform that makes travel planning simple, organized, and fun.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {/* Feature 1 */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl">
-              <Globe className="h-12 w-12 text-blue-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Multi-City Itineraries
-              </h3>
-              <p className="text-gray-600">
-                Create detailed travel plans spanning multiple cities and countries with ease.
-              </p>
+            <div className="glass-nature p-7 rounded-2xl border border-border">
+              <Globe className="h-10 w-10 text-primary mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Multi-City Itineraries</h3>
+              <p className="text-muted-foreground">Craft detailed plans spanning multiple cities and countries with ease.</p>
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl">
-              <Calendar className="h-12 w-12 text-green-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Smart Scheduling
-              </h3>
-              <p className="text-gray-600">
-                Organize activities by date and time with our intuitive calendar interface.
-              </p>
+            <div className="glass-nature p-7 rounded-2xl border border-border">
+              <Calendar className="h-10 w-10 text-emerald-500 mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Smart Scheduling</h3>
+              <p className="text-muted-foreground">Organize activities by date and time with an intuitive calendar.</p>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl">
-              <Star className="h-12 w-12 text-purple-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Activity Discovery
-              </h3>
-              <p className="text-gray-600">
-                Find and book amazing activities, tours, and experiences at every destination.
-              </p>
+            <div className="glass-nature p-7 rounded-2xl border border-border">
+              <Star className="h-10 w-10 text-accent mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Activity Discovery</h3>
+              <p className="text-muted-foreground">Find and book amazing experiences at every destination.</p>
             </div>
 
             {/* Feature 4 */}
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-8 rounded-2xl">
-              <Clock className="h-12 w-12 text-yellow-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Budget Tracking
-              </h3>
-              <p className="text-gray-600">
-                Keep track of expenses and stay within budget with detailed cost breakdowns.
-              </p>
+            <div className="glass-nature p-7 rounded-2xl border border-border">
+              <Clock className="h-10 w-10 text-amber-500 mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Budget Tracking</h3>
+              <p className="text-muted-foreground">Track expenses and stay within budget with clear breakdowns.</p>
             </div>
 
             {/* Feature 5 */}
-            <div className="bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-2xl">
-              <Users className="h-12 w-12 text-red-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Trip Sharing
-              </h3>
-              <p className="text-gray-600">
-                Share your itineraries with friends and family or make them public for inspiration.
-              </p>
+            <div className="glass-nature p-7 rounded-2xl border border-border">
+              <Users className="h-10 w-10 text-rose-500 mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Trip Sharing</h3>
+              <p className="text-muted-foreground">Share itineraries with friends, or make them public for inspiration.</p>
             </div>
 
             {/* Feature 6 */}
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-8 rounded-2xl">
-              <Shield className="h-12 w-12 text-indigo-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                Secure & Private
-              </h3>
-              <p className="text-gray-600">
-                Your travel plans are secure with enterprise-grade encryption and privacy controls.
-              </p>
+            <div className="glass-nature p-7 rounded-2xl border border-border">
+              <Shield className="h-10 w-10 text-indigo-500 mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Secure & Private</h3>
+              <p className="text-muted-foreground">Enterprise-grade encryption and privacy controls for your data.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-indigo-700">
+      <section className="py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Start Your Journey?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Join thousands of travelers who trust GlobeTrotter to plan their perfect trips.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href="/auth/register"
-              className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-colors inline-flex items-center justify-center"
-            >
-              Create Free Account
-              <Heart className="ml-2 h-5 w-5" />
-            </Link>
+          <div className="gradient-primary rounded-3xl p-10 md:p-14 shadow-xl">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Start Your Journey?</h2>
+            <p className="text-white/90 mb-8 text-lg">Join thousands of travelers who trust GlobeTrotter to plan their perfect trips.</p>
+            <div className="flex justify-center">
+              <Link href="/auth/register" className="bg-white text-foreground px-7 py-3 rounded-2xl font-semibold text-base hover:bg-muted transition-colors inline-flex items-center">
+                Create Free Account <Heart className="ml-2 h-5 w-5 text-rose-500" />
+              </Link>
+            </div>
+            <p className="text-white/80 text-sm mt-4">No credit card required • Free forever plan available</p>
           </div>
-          
-          <p className="text-blue-200 text-sm mt-4">
-            No credit card required • Free forever plan available
-          </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-card text-foreground py-12 border-t border-border/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
-              <Plane className="h-6 w-6 text-blue-400 mr-2" />
+              <Plane className="h-6 w-6 text-primary mr-2" />
               <span className="text-xl font-bold">GlobeTrotter</span>
             </div>
-            
             <div className="flex space-x-6">
-              <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors">
-                Privacy
-              </Link>
-              <Link href="/terms" className="text-gray-300 hover:text-white transition-colors">
-                Terms
-              </Link>
-              <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
-                Contact
-              </Link>
+              <Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
+              <Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
+              <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
             </div>
           </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 GlobeTrotter. All rights reserved.</p>
+          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
+            <p>© 2025 GlobeTrotter. All rights reserved.</p>
           </div>
         </div>
       </footer>
