@@ -357,4 +357,59 @@ export const sectionsAPI = {
   },
 };
 
+// Sharing API functions
+export const sharingAPI = {
+  // Get trip sharing settings and stats
+  getTripSharing: async (tripId: string) => {
+    const response = await api.get(`/sharing/trip/${tripId}/sharing`);
+    return response.data;
+  },
+
+  // Update trip visibility and sharing settings
+  updateTripSharing: async (tripId: string, settings: {
+    visibility?: 'private' | 'public' | 'unlisted' | 'friends_only';
+    allow_comments?: boolean;
+    allow_cloning?: boolean;
+    share_settings?: any;
+    generate_new_token?: boolean;
+  }) => {
+    const response = await api.put(`/sharing/trip/${tripId}/sharing`, settings);
+    return response.data;
+  },
+
+  // Share trip with specific users
+  shareTrip: async (tripId: string, shareData: {
+    emails: string[];
+    permission_level?: 'view' | 'edit' | 'admin';
+    message?: string;
+    settings?: any;
+  }) => {
+    const response = await api.post(`/sharing/trip/${tripId}/share`, shareData);
+    return response.data;
+  },
+
+  // Get public trip by share token
+  getPublicTrip: async (shareToken: string) => {
+    const response = await api.get(`/sharing/public/${shareToken}`);
+    return response.data;
+  },
+
+  // Like/unlike a public trip
+  toggleTripLike: async (shareToken: string) => {
+    const response = await api.post(`/sharing/public/${shareToken}/like`);
+    return response.data;
+  },
+
+  // Add comment to a public trip
+  addComment: async (shareToken: string, commentData: {
+    comment_text: string;
+    is_suggestion?: boolean;
+    suggested_changes?: any;
+    parent_comment_id?: string;
+  }) => {
+    const response = await api.post(`/sharing/public/${shareToken}/comment`, commentData);
+    return response.data;
+  },
+};
+
 export default api;

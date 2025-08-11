@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { X } from 'lucide-react';
+import { X, Share2 } from 'lucide-react';
 import { tripsAPI } from '@/lib/api';
 import TripSections from '@/components/sections/TripSections';
+import SharingModal from '@/components/sharing/SharingModal';
 
 interface Trip {
   trip_id: string;
@@ -38,6 +39,7 @@ export default function TripDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showSharingModal, setShowSharingModal] = useState(false);
 
   useEffect(() => {
     // Check if tab is specified in URL params
@@ -136,16 +138,26 @@ export default function TripDetailPage() {
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <div className="flex items-center space-x-4 mb-2">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => router.push('/trips')}
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    ← Back
+                  </button>
+                  <span className={`px-2 py-1 rounded-full text-sm ${getStatusColor(trip.status)}`}>
+                    {trip.status}
+                  </span>
+                </div>
+                
                 <button
-                  onClick={() => router.push('/trips')}
-                  className="text-gray-600 hover:text-gray-900"
+                  onClick={() => setShowSharingModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
-                  ← Back
+                  <Share2 className="h-4 w-4" />
+                  <span>Share Trip</span>
                 </button>
-                <span className={`px-2 py-1 rounded-full text-sm ${getStatusColor(trip.status)}`}>
-                  {trip.status}
-                </span>
               </div>
               
               <h1 className="text-2xl font-bold text-gray-900 mb-2">{trip.title}</h1>
@@ -286,6 +298,15 @@ export default function TripDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Sharing Modal */}
+      {showSharingModal && (
+        <SharingModal
+          tripId={tripId}
+          isOpen={showSharingModal}
+          onClose={() => setShowSharingModal(false)}
+        />
+      )}
     </div>
   );
 }

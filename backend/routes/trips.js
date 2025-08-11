@@ -17,7 +17,11 @@ router.post('/', auth, async (req, res) => {
       end_date, 
       total_budget, 
       currency,
-      destinations 
+      destinations,
+      visibility = 'private',
+      allow_comments = false,
+      allow_cloning = false,
+      share_settings = { email_notifications: true, show_budget: true, show_personal_info: false }
     } = req.body;
     
     const userId = req.user.user_id;
@@ -51,9 +55,14 @@ router.post('/', auth, async (req, res) => {
         end_date, 
         total_budget, 
         currency, 
-        status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING trip_id, title, description, start_date, end_date, total_budget, currency, status, created_at
+        status,
+        visibility,
+        is_public,
+        allow_comments,
+        allow_cloning,
+        share_settings
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING trip_id, title, description, start_date, end_date, total_budget, currency, status, visibility, allow_comments, allow_cloning, created_at
     `;
     
     const tripValues = [
@@ -64,7 +73,12 @@ router.post('/', auth, async (req, res) => {
       end_date,
       total_budget || null,
       currency || 'USD',
-      'planning'
+      'planning',
+      visibility,
+      visibility === 'public',
+      allow_comments,
+      allow_cloning,
+      JSON.stringify(share_settings)
     ];
     
     const tripResult = await client.query(tripQuery, tripValues);
