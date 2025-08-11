@@ -1,0 +1,311 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { 
+  ArrowLeft, 
+  Save, 
+  User, 
+  Mail, 
+  MapPin, 
+  DollarSign,
+  Plane,
+  Camera
+} from 'lucide-react';
+import ProfilePictureUpload from '@/components/ProfilePictureUpload';
+
+const travelStyles = [
+  { value: 'budget', label: 'Budget Traveler' },
+  { value: 'luxury', label: 'Luxury Traveler' },
+  { value: 'adventure', label: 'Adventure Seeker' },
+  { value: 'cultural', label: 'Cultural Explorer' },
+  { value: 'relaxation', label: 'Relaxation Focused' },
+  { value: 'business', label: 'Business Traveler' }
+];
+
+const experienceLevels = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'experienced', label: 'Experienced' },
+  { value: 'expert', label: 'Expert' }
+];
+
+const currencies = [
+  { value: 'USD', label: 'US Dollar (USD)' },
+  { value: 'EUR', label: 'Euro (EUR)' },
+  { value: 'GBP', label: 'British Pound (GBP)' },
+  { value: 'JPY', label: 'Japanese Yen (JPY)' },
+  { value: 'CAD', label: 'Canadian Dollar (CAD)' },
+  { value: 'AUD', label: 'Australian Dollar (AUD)' },
+  { value: 'CHF', label: 'Swiss Franc (CHF)' },
+  { value: 'CNY', label: 'Chinese Yuan (CNY)' }
+];
+
+const activities = [
+  'sightseeing', 'museums', 'nightlife', 'shopping', 'food-tours',
+  'outdoor-activities', 'beaches', 'hiking', 'sports', 'art-galleries',
+  'historical-sites', 'photography', 'festivals', 'architecture', 'nature'
+];
+
+export default function EditProfilePage() {
+  const { user, updateProfile, loading } = useAuth();
+  const router = useRouter();
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    country_origin: user?.country_origin || '',
+    travel_style: user?.travel_style || '',
+    travel_experience_level: user?.travel_experience_level || '',
+    preferred_currency: user?.preferred_currency || 'USD',
+    fav_activities: user?.fav_activities || [],
+    profile_picture_url: user?.profile_picture_url || null
+  });
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleProfilePictureChange = (newUrl: string | null) => {
+    setFormData(prev => ({
+      ...prev,
+      profile_picture_url: newUrl
+    }));
+  };
+
+  const handleActivityToggle = (activity: string) => {
+    setFormData(prev => ({
+      ...prev,
+      fav_activities: prev.fav_activities.includes(activity)
+        ? prev.fav_activities.filter(a => a !== activity)
+        : [...prev.fav_activities, activity]
+    }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateProfile(formData);
+      router.push('/profile');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      // You could add error handling here (toast notification, etc.)
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleBack = () => {
+    router.push('/profile');
+  };
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-16">
+            <button
+              onClick={handleBack}
+              className="mr-4 p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-100"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            
+            <div className="flex items-center">
+              <Plane className="h-8 w-8 text-emerald-500 mr-2" />
+              <h1 className="text-2xl font-bold text-gray-900">Edit Profile</h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          {/* Profile Picture Section */}
+          <div className="flex items-center space-x-6 mb-8 pb-6 border-b border-gray-200">
+            <ProfilePictureUpload
+              currentImageUrl={formData.profile_picture_url || undefined}
+              onImageChange={handleProfilePictureChange}
+              size="lg"
+              userName={formData.name}
+            />
+
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Profile Picture</h3>
+              <p className="text-sm text-gray-600">Upload a profile picture or drag and drop an image</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Basic Information */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  <User className="h-4 w-4 inline mr-2" />
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  <Mail className="h-4 w-4 inline mr-2" />
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  <MapPin className="h-4 w-4 inline mr-2" />
+                  Country of Origin
+                </label>
+                <input
+                  type="text"
+                  value={formData.country_origin}
+                  onChange={(e) => handleInputChange('country_origin', e.target.value)}
+                  placeholder="e.g., United States, Canada, United Kingdom"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  <DollarSign className="h-4 w-4 inline mr-2" />
+                  Preferred Currency
+                </label>
+                <select
+                  value={formData.preferred_currency}
+                  onChange={(e) => handleInputChange('preferred_currency', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  {currencies.map((currency) => (
+                    <option key={currency.value} value={currency.value}>
+                      {currency.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Travel Preferences */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-gray-900">Travel Preferences</h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Travel Style
+                </label>
+                <select
+                  value={formData.travel_style}
+                  onChange={(e) => handleInputChange('travel_style', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Select your travel style</option>
+                  {travelStyles.map((style) => (
+                    <option key={style.value} value={style.value}>
+                      {style.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  Experience Level
+                </label>
+                <select
+                  value={formData.travel_experience_level}
+                  onChange={(e) => handleInputChange('travel_experience_level', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                >
+                  <option value="">Select your experience level</option>
+                  {experienceLevels.map((level) => (
+                    <option key={level.value} value={level.value}>
+                      {level.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Favorite Activities */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Favorite Activities</h3>
+            <p className="text-sm text-gray-600 mb-4">Select the activities you enjoy most while traveling</p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {activities.map((activity) => (
+                <button
+                  key={activity}
+                  onClick={() => handleActivityToggle(activity)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    formData.fav_activities.includes(activity)
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {activity.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-4">
+            <button
+              onClick={handleBack}
+              className="px-6 py-2 border border-gray-200 text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

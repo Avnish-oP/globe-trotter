@@ -84,7 +84,7 @@ class ItineraryPipeline:
             "percent_match": int(match_ratio * 100)
         })
 
-    @staticmethod
+    '''@staticmethod
     def get_user_input():
         """
         Collect user preferences from CLI.
@@ -99,7 +99,7 @@ class ItineraryPipeline:
                 "experiences": [e.strip() for e in experiences.split(",") if e.strip()]
             }
         else:
-            raise RuntimeError("CLI input not available in non-interactive mode.")
+            raise RuntimeError("CLI input not available in non-interactive mode.")'''
 
     @staticmethod
     def pretty_print(data):
@@ -110,7 +110,7 @@ class ItineraryPipeline:
 
 
 def main():
-    pipeline = ItineraryPipeline(model_name="llama3-70b-8192")  # Bigger model = more accurate JSON
+    pipeline = ItineraryPipeline(model_name="llama3-70b-8192")
     user_input = pipeline.get_user_input()
     suggestions = pipeline.recommend_places(user_input, min_places=20, match_ratio=0.7)
     pipeline.pretty_print(suggestions)

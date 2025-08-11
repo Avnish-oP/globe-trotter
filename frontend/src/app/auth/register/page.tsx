@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { Mail, User, MapPin, Heart, Plane, Phone, Globe, Tag, Plus, ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 
 const predefinedAvatars = [
   { id: 1, url: '/avatars/doodle1.png', name: 'Doodle 1', emoji: '😊' },
@@ -40,8 +41,7 @@ const step1Schema = z.object({
 
 // Step 2: Personal Details
 const step2Schema = z.object({
-  selectedAvatar: z.coerce.number().min(1, 'Please select an avatar'),
-  age: z.coerce.number().int().min(13, 'Age must be at least 13'),
+  age: z.number().int().min(13, 'Age must be at least 13'),
   gender: z.enum(['Male', 'Female', 'Other']),
   genderOther: z.string().optional(),
   isStudent: z.enum(['Yes', 'No']),
@@ -79,6 +79,7 @@ export default function RegisterPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [activityInput, setActivityInput] = useState('');
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
   // Step 1 Form
   const step1Form = useForm<Step1Data>({
@@ -102,7 +103,6 @@ export default function RegisterPage() {
     defaultValues: {
       gender: 'Male',
       isStudent: 'No',
-      selectedAvatar: 1,
     },
   });
 
@@ -190,6 +190,7 @@ export default function RegisterPage() {
         fav_activities: step3Data.favActivities,
         fav_places: [], // We don't collect this in the form currently
         travel_style: step3Data.travelStyles[0] || 'budget', // Take first travel style or default to budget
+        profile_picture_url: profilePictureUrl,
       };
 
       console.log('🔍 Mapped Registration Data:', registrationData);
@@ -380,44 +381,27 @@ export default function RegisterPage() {
             {/* Step 2: Personal Details */}
             {currentStep === 2 && (
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                {/* Avatar Selection */}
+                {/* Profile Picture Upload */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-4">Choose your avatar</label>
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                    {predefinedAvatars.map((avatar) => (
-                      <div
-                        key={avatar.id}
-                        className={`relative cursor-pointer group transition-all duration-200 ${
-                          Number(step2Form.watch('selectedAvatar')) === avatar.id
-                            ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
-                            : 'hover:ring-2 hover:ring-primary/50 hover:ring-offset-2 hover:ring-offset-background'
-                        }`}
-                        onClick={() => step2Form.setValue('selectedAvatar', avatar.id, { shouldValidate: true })}
-                      >
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-2xl border-2 border-primary/30 hover:border-primary/50 transition-colors">
-                          {avatar.emoji}
-                        </div>
-                        {Number(step2Form.watch('selectedAvatar')) === avatar.id && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                            <Check className="h-3 w-3 text-white" />
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full mt-1">
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">{avatar.name}</span>
-                        </div>
-                      </div>
-                    ))}
+                  <label className="block text-sm font-medium text-foreground mb-4">Profile Picture</label>
+                  <div className="flex justify-center">
+                    <ProfilePictureUpload
+                      currentImageUrl={profilePictureUrl || undefined}
+                      onImageChange={setProfilePictureUrl}
+                      size="lg"
+                      userName={step1Form.getValues('name')}
+                    />
                   </div>
-                  {step2Form.formState.errors.selectedAvatar && (
-                    <p className="mt-1 text-sm text-destructive">{step2Form.formState.errors.selectedAvatar.message}</p>
-                  )}
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    Upload a profile picture or skip to continue (you can add one later)
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Age</label>
                     <input 
-                      {...step2Form.register('age')} 
+                      {...step2Form.register('age', { valueAsNumber: true })} 
                       type="number" 
                       min={13} 
                       className="w-full py-3 px-4 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors" 
