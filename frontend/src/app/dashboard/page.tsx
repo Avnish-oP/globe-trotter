@@ -219,27 +219,25 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Enhanced background with lighter gradients */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-32 -left-32 h-80 w-80 rounded-full bg-gradient-to-br from-blue-100/30 to-indigo-100/30 blur-3xl animate-float-gentle" />
-        <div className="absolute top-1/4 -right-32 h-96 w-96 rounded-full bg-gradient-to-br from-violet-100/25 to-purple-100/25 blur-3xl animate-float-gentle" style={{ animationDelay: '3s' }} />
-        <div className="absolute bottom-1/4 left-1/3 h-72 w-72 rounded-full bg-gradient-to-br from-emerald-100/20 to-teal-100/20 blur-3xl animate-float-gentle" style={{ animationDelay: '6s' }} />
-      </div>
-
-      {/* Enhanced Professional Header */}
-      <header className="glass-nature shadow-soft border-b border-border/50 relative z-10 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Enhanced Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-primary rounded-xl shadow-medium">
-                <Globe className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gradient-primary">GlobeTrotter</h1>
-                <p className="text-xs text-muted-foreground font-medium">Explore the World</p>
-              </div>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#232946] via-[#2d3250] to-[#f6c177]">
+      {/* Peaceful blurred mountain hiker background */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center blur-[3px] opacity-60 -z-20"
+        style={{
+          backgroundImage: "url('/mountain-hiker-bg.png')"
+        }}
+        aria-hidden="true"
+      />
+      {/* Gentle dark overlay for contrast and calmness */}
+      <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black/50 via-indigo-900/30 to-transparent -z-10" aria-hidden="true" />
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Plane className="h-8 w-8 text-blue-600 mr-2" />
+              <h1 className="text-2xl font-bold text-gray-900">GlobeTrotter</h1>
             </div>
 
             {/* Enhanced User Menu */}
@@ -254,8 +252,10 @@ export default function DashboardPage() {
                 </button>
               </div>
               
-              {/* User Profile Section */}
-              <div className="flex items-center space-x-4 pl-4 border-l border-border/50">
+              <button 
+                onClick={() => router.push('/profile')}
+                className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 transition-colors"
+              >
                 <div className="text-right">
                   <p className="text-sm font-semibold text-foreground">{user.name}</p>
                   <p className="text-xs text-muted-foreground">{user.email}</p>
@@ -277,7 +277,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
                 </div>
-              </div>
+              </button>
 
               {/* Action Buttons */}
               <div className="flex items-center space-x-2">

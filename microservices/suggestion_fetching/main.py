@@ -1,5 +1,5 @@
 def main():
-    print("Hello from Suggestions Fetching API")
+    print("Hello from Suggestions Fetching API!")
 
 
 if __name__ == "__main__":

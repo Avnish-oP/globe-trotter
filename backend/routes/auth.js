@@ -16,6 +16,7 @@ const {
 } = require('../utils/validation');
 const { authenticateToken } = require('../utils/middleware');
 const { asyncHandler } = require('../utils/errorHandler');
+const { upload, uploadImage, deleteImage, extractPublicId } = require('../utils/cloudinary');
 
 /**
  * @route POST /api/auth/register
@@ -34,7 +35,8 @@ router.post('/register', validateRegistration, asyncHandler(async (req, res) => 
     fav_places = [],
     travel_style,
     preferred_currency = 'USD',
-    travel_experience_level = 'beginner'
+    travel_experience_level = 'beginner',
+    profile_picture_url
   } = req.body;
 
   // Check if user already exists
@@ -58,16 +60,16 @@ router.post('/register', validateRegistration, asyncHandler(async (req, res) => 
     INSERT INTO users (
       name, email, password_hash, country_origin, 
       fav_activities, fav_places, travel_style,
-      preferred_currency, travel_experience_level
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      preferred_currency, travel_experience_level, profile_picture_url
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     RETURNING user_id, name, email, country_origin, 
              fav_activities, fav_places, travel_style,
              preferred_currency, travel_experience_level,
-             created_at
+             profile_picture_url, created_at
   `, [
     name, email, hashedPassword, country_origin,
     fav_activities, fav_places, travel_style,
-    preferred_currency, travel_experience_level
+    preferred_currency, travel_experience_level, profile_picture_url
   ]);
 
   const user = newUser.rows[0];
@@ -201,7 +203,8 @@ router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
     preferred_currency,
     travel_experience_level,
     notification_preferences,
-    privacy_settings
+    privacy_settings,
+    profile_picture_url
   } = req.body;
 
   // Build dynamic update query
@@ -229,6 +232,7 @@ router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
   addField('travel_experience_level', travel_experience_level);
   addField('notification_preferences', JSON.stringify(notification_preferences));
   addField('privacy_settings', JSON.stringify(privacy_settings));
+  addField('profile_picture_url', profile_picture_url);
   addField('updated_at', new Date());
 
   if (updateFields.length === 0) {
@@ -256,6 +260,120 @@ router.put('/profile', authenticateToken, asyncHandler(async (req, res) => {
       user: sanitizeUser(result.rows[0])
     }
   });
+}));
+
+/**
+ * @route POST /api/auth/upload-profile-picture
+ * @desc Upload profile picture to Cloudinary
+ * @access Private
+ */
+router.post('/upload-profile-picture', authenticateToken, upload.single('profilePicture'), asyncHandler(async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    // Get the current user to check for existing profile picture
+    const userResult = await query(
+      'SELECT profile_picture_url FROM users WHERE user_id = $1',
+      [req.user.userId]
+    );
+
+    const currentUser = userResult.rows[0];
+
+    // Delete old profile picture if it exists
+    if (currentUser && currentUser.profile_picture_url) {
+      try {
+        const publicId = extractPublicId(currentUser.profile_picture_url);
+        if (publicId) {
+          await deleteImage(publicId);
+        }
+      } catch (deleteError) {
+        console.warn('Warning: Could not delete old profile picture:', deleteError.message);
+        // Continue with upload even if deletion fails
+      }
+    }
+
+    // Update user's profile_picture_url in database
+    const updatedUser = await query(`
+      UPDATE users 
+      SET profile_picture_url = $1, updated_at = NOW() 
+      WHERE user_id = $2
+      RETURNING *
+    `, [req.file.path, req.user.userId]);
+
+    res.json({
+      success: true,
+      message: 'Profile picture uploaded successfully',
+      data: {
+        profile_picture_url: req.file.path,
+        user: sanitizeUser(updatedUser.rows[0])
+      }
+    });
+
+  } catch (error) {
+    console.error('Profile picture upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload profile picture'
+    });
+  }
+}));
+
+/**
+ * @route DELETE /api/auth/delete-profile-picture
+ * @desc Delete profile picture from Cloudinary and database
+ * @access Private
+ */
+router.delete('/delete-profile-picture', authenticateToken, asyncHandler(async (req, res) => {
+  // Get the current user's profile picture URL
+  const userResult = await query(
+    'SELECT profile_picture_url FROM users WHERE user_id = $1',
+    [req.user.userId]
+  );
+
+  const user = userResult.rows[0];
+
+  if (!user || !user.profile_picture_url) {
+    return res.status(404).json({
+      success: false,
+      message: 'No profile picture found'
+    });
+  }
+
+  try {
+    // Delete from Cloudinary
+    const publicId = extractPublicId(user.profile_picture_url);
+    if (publicId) {
+      await deleteImage(publicId);
+    }
+
+    // Remove from database
+    const updatedUser = await query(`
+      UPDATE users 
+      SET profile_picture_url = NULL, updated_at = NOW() 
+      WHERE user_id = $1
+      RETURNING *
+    `, [req.user.userId]);
+
+    res.json({
+      success: true,
+      message: 'Profile picture deleted successfully',
+      data: {
+        user: sanitizeUser(updatedUser.rows[0])
+      }
+    });
+
+  } catch (error) {
+    console.error('Profile picture deletion error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete profile picture'
+    });
+  }
 }));
 
 /**
