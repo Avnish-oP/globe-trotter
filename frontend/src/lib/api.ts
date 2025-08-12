@@ -286,6 +286,58 @@ export const tripsAPI = {
     const response = await api.get('/trips/user/all');
     return response.data;
   },
+
+  // Get public trip (for sharing)
+  getPublicTrip: async (tripId: string) => {
+    const response = await api.get(`/public/trips/${tripId}`);
+    return response.data;
+  },
+
+  // Copy/clone a trip
+  copyTrip: async (tripId: string) => {
+    const response = await api.post(`/trips/${tripId}/copy`);
+    return response.data;
+  },
+
+  // Like/unlike trip
+  likeTrip: async (tripId: string) => {
+    const response = await api.post(`/trips/${tripId}/like`);
+    return response.data;
+  },
+
+  unlikeTrip: async (tripId: string) => {
+    const response = await api.delete(`/trips/${tripId}/like`);
+    return response.data;
+  },
+
+  // Bookmark trip
+  addBookmark: async (tripId: string) => {
+    const response = await api.post(`/trips/${tripId}/bookmark`);
+    return response.data;
+  },
+
+  removeBookmark: async (tripId: string) => {
+    const response = await api.delete(`/trips/${tripId}/bookmark`);
+    return response.data;
+  },
+
+  // Increment view count
+  incrementTripViews: async (tripId: string) => {
+    const response = await api.post(`/trips/${tripId}/view`);
+    return response.data;
+  },
+
+  // Get trip budget breakdown
+  getTripBudget: async (tripId: string) => {
+    const response = await api.get(`/trips/${tripId}/budget`);
+    return response.data;
+  },
+
+  // Update trip budget
+  updateTripBudget: async (tripId: string, budgetData: any) => {
+    const response = await api.put(`/trips/${tripId}/budget`, budgetData);
+    return response.data;
+  },
 };
 
 // Location API functions
@@ -317,6 +369,12 @@ export const locationAPI = {
   // Get countries
   getCountries: async () => {
     const response = await api.get('/locations/countries');
+    return response.data;
+  },
+
+  // Get location details
+  getLocation: async (locationId: string) => {
+    const response = await api.get(`/locations/${locationId}`);
     return response.data;
   },
 
@@ -387,6 +445,30 @@ export const sectionsAPI = {
     const response = await api.delete(`/sections/sections/${sectionId}`);
     return response.data;
   },
+
+  // Get section by ID
+  getSectionById: async (sectionId: string) => {
+    const response = await api.get(`/sections/${sectionId}`);
+    return response.data;
+  },
+
+  // Get public trip sections
+  getPublicTripSections: async (tripId: string) => {
+    const response = await api.get(`/public/trips/${tripId}/sections`);
+    return response.data;
+  },
+
+  // Add place to section
+  addPlaceToSection: async (sectionId: string, placeData: any) => {
+    const response = await api.post(`/sections/${sectionId}/places`, placeData);
+    return response.data;
+  },
+
+  // Remove place from section
+  removePlaceFromSection: async (sectionId: string, placeId: string) => {
+    const response = await api.delete(`/sections/${sectionId}/places/${placeId}`);
+    return response.data;
+  },
 };
 
 // Sharing API functions
@@ -442,6 +524,112 @@ export const sharingAPI = {
     const response = await api.post(`/sharing/public/${shareToken}/comment`, commentData);
     return response.data;
   },
+};
+
+// Enhanced trips API functions
+export const tripsAPIEnhanced = {
+  // Get public trip (for sharing)
+  getPublicTrip: async (tripId: string) => {
+    return api.get(`/public/trips/${tripId}`);
+  },
+
+  // Copy/clone a trip
+  copyTrip: async (tripId: string) => {
+    return api.post(`/trips/${tripId}/copy`);
+  },
+
+  // Like/unlike trip
+  likeTrip: async (tripId: string) => {
+    return api.post(`/trips/${tripId}/like`);
+  },
+
+  unlikeTrip: async (tripId: string) => {
+    return api.delete(`/trips/${tripId}/like`);
+  },
+
+  // Bookmark trip
+  addBookmark: async (tripId: string) => {
+    return api.post(`/trips/${tripId}/bookmark`);
+  },
+
+  removeBookmark: async (tripId: string) => {
+    return api.delete(`/trips/${tripId}/bookmark`);
+  },
+
+  // Increment view count
+  incrementTripViews: async (tripId: string) => {
+    return api.post(`/trips/${tripId}/view`);
+  },
+
+  // Get trip budget breakdown
+  getTripBudget: async (tripId: string) => {
+    return api.get(`/trips/${tripId}/budget`);
+  },
+
+  // Update trip budget
+  updateTripBudget: async (tripId: string, budgetData: any) => {
+    return api.put(`/trips/${tripId}/budget`, budgetData);
+  }
+};
+
+// Activity API functions
+export const activitiesAPI = {
+  // Get activity suggestions for a location/city
+  getLocationActivities: async (locationQuery: string, filters: any = {}) => {
+    const params = new URLSearchParams({
+      location: locationQuery,
+      ...filters
+    });
+    return api.get(`/activities/search?${params}`);
+  },
+
+  // Get specific activity details
+  getActivity: async (activityId: string) => {
+    return api.get(`/activities/${activityId}`);
+  },
+
+  // Search activities with filters
+  searchActivities: async (searchQuery: string, filters: any = {}) => {
+    const params = new URLSearchParams({
+      q: searchQuery,
+      ...filters
+    });
+    return api.get(`/activities/search?${params}`);
+  },
+
+  // Get popular activities for a destination
+  getPopularActivities: async (destinationId: string) => {
+    return api.get(`/activities/popular/${destinationId}`);
+  },
+
+  // Get activity categories
+  getActivityCategories: async () => {
+    return api.get('/activities/categories');
+  }
+};
+
+// Places API functions
+export const placesAPI = {
+  // Search places in a location
+  searchPlaces: async (location: string, filters: any = {}) => {
+    const params = new URLSearchParams({
+      location,
+      ...filters
+    });
+    return api.get(`/places/search?${params}`);
+  },
+
+  // Get place details
+  getPlace: async (placeId: string) => {
+    return api.get(`/places/${placeId}`);
+  },
+
+  // Get places by category
+  getPlacesByCategory: async (category: string, location?: string) => {
+    const params = new URLSearchParams({ category });
+    if (location) params.append('location', location);
+    return api.get(`/places/category?${params}`);
+  }
 };
 
 export default api;
