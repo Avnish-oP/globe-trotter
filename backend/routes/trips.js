@@ -213,6 +213,8 @@ router.get('/:tripId', auth, async (req, res) => {
               'city_id', c.city_id,
               'city_name', c.name,
               'country_name', co.name,
+              'latitude', c.latitude,
+              'longitude', c.longitude,
               'arrival_date', ts.arrival_date,
               'departure_date', ts.departure_date,
               'stop_order', ts.stop_order
@@ -269,6 +271,8 @@ router.get('/user/all', auth, async (req, res) => {
               'city_id', c.city_id,
               'city_name', c.name,
               'country_name', co.name,
+              'latitude', c.latitude,
+              'longitude', c.longitude,
               'arrival_date', ts.arrival_date,
               'departure_date', ts.departure_date
             ) ORDER BY ts.stop_order

@@ -134,7 +134,7 @@ const sampleTrips: TripLocation[] = [
 ];
 
 const TripMap: React.FC<TripMapProps> = ({ 
-  trips = sampleTrips, 
+  trips = [], 
   className = '',
   height = '400px'
 }) => {

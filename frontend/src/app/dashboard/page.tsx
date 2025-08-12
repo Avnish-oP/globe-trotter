@@ -7,36 +7,40 @@ import TripMap from '@/components/TripMap';
 import TripsFilter, { FilterState, SortOption, GroupOption } from '@/components/TripsFilter';
 import TripsList from '@/components/TripsList';
 import FloatingActionButton from '@/components/FloatingActionButton';
-import { dashboardAPI } from '@/lib/api';
+import TripRecommendations from '@/components/TripRecommendations';
+import Navigation from '@/components/Navigation';
+import AdvancedSearch from '@/components/AdvancedSearch';
+import { dashboardAPI, tripsAPI } from '@/lib/api';
 import { 
   Plane, 
-  Settings,
-  LogOut,
-  Bell,
-  User,
-  Menu,
-  X,
+  MapPin,
+  Calendar,
+  DollarSign,
   Eye,
   Share2,
   Clock,
   Star,
   Heart,
   ChevronRight,
-  Globe,
   Filter,
   SortAsc,
   SortDesc,
   ArrowUpDown,
   Map,
   Camera,
-  Bookmark
+  Bookmark,
+  Search,
+  Globe,
+  Users
 } from 'lucide-react';
 
 interface DashboardStats {
-  totalTrips: number;
-  upcomingTrips: number;
-  totalBudget: number;
-  countriesVisited: number;
+  stats: {
+    totalTrips: number;
+    upcomingTrips: number;
+    totalBudget: number;
+    countriesVisited: number;
+  };
 }
 
 interface Trip {
@@ -64,6 +68,50 @@ interface City {
   popularity_score?: number;
 }
 
+// Doodle SVGs for background
+const doodleSvgs = [
+  <svg key="bag" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="12" y="20" width="24" height="18" rx="4"/><path d="M16 20v-4a8 8 0 0 1 16 0v4"/></svg>,
+  <svg key="trolley" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="16" y="16" width="16" height="20" rx="3"/><path d="M24 16v-6"/><circle cx="20" cy="38" r="2"/><circle cx="28" cy="38" r="2"/></svg>,
+  <svg key="umbrella" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M8 24a16 16 0 0 1 32 0z"/><path d="M24 24v12"/><circle cx="24" cy="40" r="2"/></svg>,
+  <svg key="bus" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="6" y="18" width="36" height="16" rx="4"/><circle cx="14" cy="36" r="2"/><circle cx="34" cy="36" r="2"/><path d="M6 26h36"/></svg>,
+  <svg key="backpack" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="14" y="18" width="20" height="18" rx="6"/><path d="M24 18v-6"/><path d="M18 36v4"/><path d="M30 36v4"/></svg>,
+  <svg key="camera" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="10" y="18" width="28" height="18" rx="4"/><circle cx="24" cy="27" r="6"/><path d="M18 18l2-4h8l2 4"/></svg>,
+  <svg key="mountain" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M4 40l12-20 8 12 8-16 12 24z"/></svg>,
+  <svg key="trekking" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><circle cx="24" cy="24" r="10"/><path d="M24 14v10l7 7"/></svg>,
+];
+
+function DoodleBackground({ count = 40 }) {
+  const doodles = React.useMemo(() => {
+    return Array.from({ length: count }).map((_, i) => {
+      const Svg = doodleSvgs[Math.floor(Math.random() * doodleSvgs.length)];
+      const top = Math.random() * 100;
+      const left = Math.random() * 100;
+      const size = 16 + Math.random() * 32;
+      const opacity = 0.10 + Math.random() * 0.18;
+      const rotate = Math.random() * 360;
+      return (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${top}%`,
+            left: `${left}%`,
+            width: size,
+            height: size,
+            opacity,
+            transform: `rotate(${rotate}deg)`,
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        >
+          {React.cloneElement(Svg, { width: size, height: size })}
+        </div>
+      );
+    });
+  }, [count]);
+  return <>{doodles}</>;
+}
+
 export default function DashboardPage() {
   const { user, logout, isAuthenticated, loading } = useAuth();
   const router = useRouter();
@@ -88,7 +136,6 @@ export default function DashboardPage() {
     previousTrips: true
   });
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,6 +147,11 @@ export default function DashboardPage() {
   });
   const [sortBy, setSortBy] = useState<SortOption>('date-desc');
   const [groupBy, setGroupBy] = useState<GroupOption>('none');
+  const [allTrips, setAllTrips] = useState<any[]>([]);
+  
+  // Advanced search states
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [activeTab, setActiveTab] = useState<'my-trips' | 'discover'>('my-trips');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -118,11 +170,12 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       // Fetch all dashboard data in parallel
-      const [statsRes, tripsRes, citiesRes, recommendationsRes] = await Promise.allSettled([
+      const [statsRes, tripsRes, citiesRes, recommendationsRes, allTripsRes] = await Promise.allSettled([
         dashboardAPI.getDashboardData(),
         dashboardAPI.getUpcomingTrips(),
         dashboardAPI.getPopularCities(8), // Get more cities for regional section
-        dashboardAPI.getRecommendedDestinations()
+        dashboardAPI.getRecommendedDestinations(),
+        tripsAPI.getUserTrips()
       ]);
 
       // Handle stats
@@ -155,6 +208,11 @@ export default function DashboardPage() {
       }
       setLoadingStates(prev => ({ ...prev, recommendations: false }));
 
+      // Handle all user trips for map and list
+      if (allTripsRes.status === 'fulfilled') {
+        setAllTrips(allTripsRes.value.data);
+      }
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       // Set all loading states to false on error
@@ -168,6 +226,71 @@ export default function DashboardPage() {
     }
   };
 
+  // Transform API trip data to component format
+  const transformTripsForComponents = (trips: any[]) => {
+    return trips
+      .map(trip => {
+        // Get the primary city (first stop) for coordinates
+        const primaryCity = trip.stops && trip.stops.length > 0 ? trip.stops[0] : null;
+        
+        // Determine trip status based on dates
+        const now = new Date();
+        const startDate = new Date(trip.start_date);
+        const endDate = new Date(trip.end_date);
+        
+        let status: 'upcoming' | 'completed' | 'current' = 'completed';
+        if (startDate > now) {
+          status = 'upcoming';
+        } else if (startDate <= now && endDate >= now) {
+          status = 'current';
+        }
+
+        // Use actual coordinates from the primary city
+        // If coordinates are null, use city name to get approximate coordinates
+        let coordinates: [number, number] = [0, 0];
+        
+        if (primaryCity && primaryCity.latitude && primaryCity.longitude) {
+          coordinates = [parseFloat(primaryCity.latitude), parseFloat(primaryCity.longitude)];
+        } else if (primaryCity) {
+          // Fallback coordinates for common cities
+          const cityCoordinates: { [key: string]: [number, number] } = {
+            'New York': [40.7128, -74.0060],
+            'Paris': [48.8566, 2.3522],
+            'Tokyo': [35.6762, 139.6503],
+            'London': [51.5074, -0.1278],
+            'Sydney': [-33.8688, 151.2093],
+            'Delhi': [28.6139, 77.2090],
+            'Mumbai': [19.0760, 72.8777],
+            'Bangkok': [13.7563, 100.5018],
+            'Rome': [41.9028, 12.4964],
+            'Barcelona': [41.3851, 2.1734],
+            'Berlin': [52.5200, 13.4050],
+            'Maldives': [3.2028, 73.2207],
+            'Goa': [15.2993, 74.1240],
+            'Tehran': [35.6892, 51.3890]
+          };
+          
+          const cityName = primaryCity.city_name;
+          coordinates = cityCoordinates[cityName] || [0, 0];
+        }
+
+        return {
+          id: trip.trip_id,
+          name: trip.title,
+          coordinates,
+          country: primaryCity ? primaryCity.country_name : 'Unknown',
+          startDate: trip.start_date,
+          endDate: trip.end_date,
+          status,
+          description: trip.description,
+          budget: trip.total_budget,
+          imageUrl: trip.cover_image_url || undefined,
+          currency: trip.currency || 'USD',
+          cities: trip.stops?.map((stop: any) => stop.city_name) || []
+        };
+      });
+  };
+
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -176,8 +299,8 @@ export default function DashboardPage() {
 
     setIsSearching(true);
     try {
-      const response = await dashboardAPI.searchPublicTrips(query);
-      setSearchResults(response.data);
+      const response = await dashboardAPI.searchPublicTrips({ q: query });
+      setSearchResults(response.data.trips || []);
     } catch (error) {
       console.error('Error searching trips:', error);
       setSearchResults([]);
@@ -196,6 +319,26 @@ export default function DashboardPage() {
       setSearchResults(prev => prev.filter(trip => trip.trip_id !== tripId));
     } catch (error) {
       console.error('Error following trip:', error);
+    }
+  };
+
+  const handleTripSelect = (trip: any) => {
+    router.push(`/trips/${trip.id}`);
+  };
+
+  const handleTripEdit = (trip: any) => {
+    router.push(`/trips/${trip.id}?tab=sections`);
+  };
+
+  const handleTripDelete = async (trip: any) => {
+    if (confirm('Are you sure you want to delete this trip?')) {
+      try {
+        await tripsAPI.deleteTrip(trip.id);
+        // Refresh trips data
+        fetchDashboardData();
+      } catch (error) {
+        console.error('Error deleting trip:', error);
+      }
     }
   };
 
@@ -243,98 +386,8 @@ export default function DashboardPage() {
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-100/30 via-violet-100/20 to-transparent"></div>
       
-      {/* Header */}
-      <header className="relative z-10 bg-white/90 backdrop-blur-md shadow-sm border-b border-purple-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center">
-              <div className="p-2 bg-gradient-to-r from-purple-500 to-violet-600 rounded-lg">
-                <Plane className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="ml-3 text-2xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">
-                GlobeTrotter
-              </h1>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
-              <button className="p-2 text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all duration-200">
-                <Bell className="h-6 w-6" />
-              </button>
-              
-              <button 
-                onClick={() => router.push('/profile')}
-                className="flex items-center space-x-3 hover:bg-purple-50 rounded-lg p-2 transition-all duration-200"
-              >
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                  <p className="text-xs text-purple-600">{user.email}</p>
-                </div>
-                
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-violet-600 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-white font-semibold text-sm">
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              </button>
-
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-2">
-                <button className="p-2 text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all duration-200">
-                  <Settings className="h-5 w-5" />
-                </button>
-                <button 
-                  onClick={handleLogout}
-                  className="p-2 text-purple-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                >
-                  <LogOut className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 text-purple-500 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-all duration-200"
-              >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-purple-200/50 py-4">
-              <div className="flex flex-col space-y-2">
-                <button 
-                  onClick={() => router.push('/profile')}
-                  className="flex items-center space-x-3 hover:bg-purple-50 rounded-lg p-3 transition-all duration-200"
-                >
-                  <User className="h-5 w-5 text-purple-500" />
-                  <span className="text-gray-700">Profile</span>
-                </button>
-                <button className="flex items-center space-x-3 hover:bg-purple-50 rounded-lg p-3 transition-all duration-200">
-                  <Bell className="h-5 w-5 text-purple-500" />
-                  <span className="text-gray-700">Notifications</span>
-                </button>
-                <button className="flex items-center space-x-3 hover:bg-purple-50 rounded-lg p-3 transition-all duration-200">
-                  <Settings className="h-5 w-5 text-purple-500" />
-                  <span className="text-gray-700">Settings</span>
-                </button>
-                <button 
-                  onClick={handleLogout}
-                  className="flex items-center space-x-3 hover:bg-red-50 rounded-lg p-3 transition-all duration-200 text-red-600"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </header>
+      {/* Navigation */}
+      <Navigation currentPage="dashboard" showCreateButton={true} />
 
       {/* Main Content */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -345,6 +398,59 @@ export default function DashboardPage() {
           </h2>
           <p className="text-purple-600 text-lg">Track your adventures and plan your next journey</p>
         </div>
+
+        {/* Dashboard Stats - Quick Overview */}
+        {dashboardStats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-purple-200/50 p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Trips</p>
+                  <p className="text-2xl font-bold text-purple-700">{dashboardStats.stats.totalTrips}</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-violet-600 rounded-lg flex items-center justify-center">
+                  <Plane className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-purple-200/50 p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Upcoming Trips</p>
+                  <p className="text-2xl font-bold text-green-700">{dashboardStats.stats.upcomingTrips}</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-purple-200/50 p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Countries Visited</p>
+                  <p className="text-2xl font-bold text-blue-700">{dashboardStats.stats.countriesVisited}</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <MapPin className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-purple-200/50 p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Budget</p>
+                  <p className="text-2xl font-bold text-amber-700">${dashboardStats.stats.totalBudget.toLocaleString()}</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Map Section - Full Width at Top */}
         <div className={`mb-8 ${isMapFullscreen ? 'fixed inset-0 z-50 bg-white p-4' : ''}`}>
@@ -370,32 +476,90 @@ export default function DashboardPage() {
             </div>
             
             <div className="px-6 pb-6">
-              <TripMap height={isMapFullscreen ? 'calc(100vh - 200px)' : '400px'} />
+              <TripMap 
+                height={isMapFullscreen ? 'calc(100vh - 200px)' : '400px'} 
+                trips={transformTripsForComponents(allTrips)}
+              />
             </div>
           </div>
         </div>
 
-        {/* Filters Section */}
+        {/* Tab Navigation */}
         {!isMapFullscreen && (
           <div className="mb-8">
-            <TripsFilter
-              onSearchChange={setSearchTerm}
-              onFilterChange={setFilters}
-              onSortChange={setSortBy}
-              onGroupChange={setGroupBy}
-            />
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-purple-200/50 shadow-md">
+              <div className="flex border-b border-gray-200">
+                <button
+                  onClick={() => setActiveTab('my-trips')}
+                  className={`flex-1 px-6 py-4 text-center font-medium transition-all duration-200 ${
+                    activeTab === 'my-trips'
+                      ? 'text-purple-700 border-b-2 border-purple-700 bg-purple-50/50'
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <Map className="w-5 h-5" />
+                    <span>My Trips</span>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('discover')}
+                  className={`flex-1 px-6 py-4 text-center font-medium transition-all duration-200 ${
+                    activeTab === 'discover'
+                      ? 'text-purple-700 border-b-2 border-purple-700 bg-purple-50/50'
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-center space-x-2">
+                    <Globe className="w-5 h-5" />
+                    <span>Discover Trips</span>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Trips List Section */}
-        {!isMapFullscreen && (
+        {/* Content based on active tab */}
+        {activeTab === 'my-trips' && !isMapFullscreen && (
+          <>
+            {/* Filters Section */}
+            <div className="mb-8">
+              <TripsFilter
+                onSearchChange={setSearchTerm}
+                onFilterChange={setFilters}
+                onSortChange={setSortBy}
+                onGroupChange={setGroupBy}
+              />
+            </div>
+
+            {/* Recommendations Section */}
+            <div className="mb-8">
+              <TripRecommendations 
+                userTrips={allTrips}
+              />
+            </div>
+
+            {/* Trips List Section */}
+            <div className="mb-20">
+              <TripsList
+                searchTerm={searchTerm}
+                filters={filters}
+                sortBy={sortBy}
+                groupBy={groupBy}
+                trips={transformTripsForComponents(allTrips)}
+                onTripSelect={handleTripSelect}
+                onTripEdit={handleTripEdit}
+                onTripDelete={handleTripDelete}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Advanced Search Section */}
+        {activeTab === 'discover' && !isMapFullscreen && (
           <div className="mb-20">
-            <TripsList
-              searchTerm={searchTerm}
-              filters={filters}
-              sortBy={sortBy}
-              groupBy={groupBy}
-            />
+            <AdvancedSearch />
           </div>
         )}
       </main>

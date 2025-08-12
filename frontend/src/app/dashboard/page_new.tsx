@@ -144,9 +144,9 @@ export default function DashboardPage() {
 
     setIsSearching(true);
     try {
-      const response = await dashboardAPI.searchPublicTrips(query);
+      const response = await dashboardAPI.searchPublicTrips({ q: query });
       setSearchResults(response.data);
-    } catch (error) {
+          } catch (error) {
       console.error('Error searching trips:', error);
       setSearchResults([]);
     } finally {

@@ -192,23 +192,20 @@ router.get('/external-search', optionalAuth, async (req, res) => {
       });
     }
     
-    // Use dynamic import for node-fetch (ES module)
-    const fetch = (await import('node-fetch')).default;
+    // Use axios instead of node-fetch for better compatibility
+    const axios = require('axios');
     
     // Use Nominatim API for location search
     const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=${limit}&q=${encodeURIComponent(query)}&accept-language=en`;
     
-    const response = await fetch(nominatimUrl, {
+    const response = await axios.get(nominatimUrl, {
       headers: {
         'User-Agent': 'GlobeTrotter/1.0 (contact@globetrotter.com)'
-      }
+      },
+      timeout: 5000 // 5 second timeout
     });
     
-    if (!response.ok) {
-      throw new Error('External API request failed');
-    }
-    
-    const data = await response.json();
+    const data = response.data;
     
     // Format the response to match our schema
     const formattedData = data
