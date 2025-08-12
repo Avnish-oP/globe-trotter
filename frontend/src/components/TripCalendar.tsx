@@ -44,15 +44,15 @@ export default function TripCalendar({
 
   const getStatusColor = (status: string, type: 'trip' | 'stop') => {
     const baseColors = {
-      planning: type === 'trip' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-amber-50 text-amber-700 border-amber-100',
-      booked: type === 'trip' ? 'bg-blue-100 text-blue-800 border-blue-200' : 'bg-blue-50 text-blue-700 border-blue-100',
-      ongoing: type === 'trip' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-green-50 text-green-700 border-green-100',
-      completed: type === 'trip' ? 'bg-purple-100 text-purple-800 border-purple-200' : 'bg-purple-50 text-purple-700 border-purple-100',
-      cancelled: type === 'trip' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-red-50 text-red-700 border-red-100'
+      planning: type === 'trip' ? 'bg-amber-200 text-amber-900 border-amber-300' : 'bg-amber-100 text-amber-800 border-amber-200',
+      booked: type === 'trip' ? 'bg-blue-200 text-blue-900 border-blue-300' : 'bg-blue-100 text-blue-800 border-blue-200',
+      ongoing: type === 'trip' ? 'bg-green-200 text-green-900 border-green-300' : 'bg-green-100 text-green-800 border-green-200',
+      completed: type === 'trip' ? 'bg-purple-200 text-purple-900 border-purple-300' : 'bg-purple-100 text-purple-800 border-purple-200',
+      cancelled: type === 'trip' ? 'bg-red-200 text-red-900 border-red-300' : 'bg-red-100 text-red-800 border-red-200'
     };
     
     return baseColors[status.toLowerCase() as keyof typeof baseColors] || 
-           (type === 'trip' ? 'bg-gray-100 text-gray-800 border-gray-200' : 'bg-gray-50 text-gray-700 border-gray-100');
+           (type === 'trip' ? 'bg-gray-200 text-gray-900 border-gray-300' : 'bg-gray-100 text-gray-800 border-gray-200');
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -175,7 +175,7 @@ export default function TripCalendar({
             ))}
             
             {dayEvents.length > 3 && (
-              <div className="text-xs text-gray-500 px-2">
+              <div className="text-xs text-gray-700 font-medium px-2">
                 +{dayEvents.length - 3} more
               </div>
             )}
@@ -201,7 +201,7 @@ export default function TripCalendar({
       <div className="grid grid-cols-7 gap-0 border border-gray-200 rounded-lg overflow-hidden">
         {/* Day headers */}
         {dayNames.map((day) => (
-          <div key={day} className="bg-purple-50 p-3 text-center font-semibold text-purple-700 text-sm border-b">
+          <div key={day} className="bg-purple-100 p-3 text-center font-bold text-purple-800 text-sm border-b">
             {day}
           </div>
         ))}
@@ -242,12 +242,12 @@ export default function TripCalendar({
           
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Trips:</span>
-              <span className="font-medium text-purple-700">{tripEvents.length}</span>
+              <span className="text-gray-800 font-medium">Trips:</span>
+              <span className="font-bold text-purple-900">{tripEvents.length}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Destinations:</span>
-              <span className="font-medium text-blue-700">{stopEvents.length}</span>
+              <span className="text-gray-800 font-medium">Destinations:</span>
+              <span className="font-bold text-blue-900">{stopEvents.length}</span>
             </div>
           </div>
           
@@ -264,7 +264,7 @@ export default function TripCalendar({
                 </div>
               ))}
               {monthEvents.length > 2 && (
-                <div className="text-xs text-gray-500 px-2">
+                <div className="text-xs text-gray-700 font-medium px-2">
                   +{monthEvents.length - 2} more
                 </div>
               )}
@@ -322,30 +322,30 @@ export default function TripCalendar({
       {/* Legend */}
       <div className="mt-6 flex flex-wrap gap-4 text-sm">
         <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 bg-blue-200 border border-blue-300 rounded"></div>
+          <span className="text-gray-800 font-medium">✈️ Trips</span>
+        </div>
+        <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-blue-100 border border-blue-200 rounded"></div>
-          <span>✈️ Trips</span>
+          <span className="text-gray-800 font-medium">📍 Destinations</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-blue-50 border border-blue-100 rounded"></div>
-          <span>📍 Destinations</span>
+          <div className="w-4 h-4 bg-green-200 border border-green-300 rounded"></div>
+          <span className="text-gray-800 font-medium">Ongoing</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-green-100 border border-green-200 rounded"></div>
-          <span>Ongoing</span>
+          <div className="w-4 h-4 bg-amber-200 border border-amber-300 rounded"></div>
+          <span className="text-gray-800 font-medium">Planning</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-amber-100 border border-amber-200 rounded"></div>
-          <span>Planning</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-purple-100 border border-purple-200 rounded"></div>
-          <span>Completed</span>
+          <div className="w-4 h-4 bg-purple-200 border border-purple-300 rounded"></div>
+          <span className="text-gray-800 font-medium">Completed</span>
         </div>
       </div>
 
       {/* Event Tooltip */}
       {hoveredEvent && (
-        <div className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-4 max-w-sm pointer-events-none"
+        <div className="absolute z-50 bg-white border border-gray-300 rounded-lg shadow-lg p-4 max-w-sm pointer-events-none"
              style={{ 
                position: 'fixed',
                top: '50%',
@@ -353,20 +353,20 @@ export default function TripCalendar({
                transform: 'translate(-50%, -50%)'
              }}>
           <div className="flex items-start justify-between mb-2">
-            <h4 className="font-semibold text-gray-900">{hoveredEvent.title}</h4>
-            <span className={`px-2 py-1 rounded text-xs border ${getStatusColor(hoveredEvent.status, hoveredEvent.type)}`}>
+            <h4 className="font-bold text-gray-900">{hoveredEvent.title}</h4>
+            <span className={`px-2 py-1 rounded text-xs font-bold border ${getStatusColor(hoveredEvent.status, hoveredEvent.type)}`}>
               {hoveredEvent.status}
             </span>
           </div>
           
-          <div className="space-y-2 text-sm text-gray-600">
-            <div className="flex items-center">
+          <div className="space-y-2 text-sm text-gray-800">
+            <div className="flex items-center font-medium">
               <CalendarIcon className="h-4 w-4 mr-2" />
               {hoveredEvent.startDate.toLocaleDateString()} - {hoveredEvent.endDate.toLocaleDateString()}
             </div>
             
             {hoveredEvent.destinations.length > 0 && (
-              <div className="flex items-center">
+              <div className="flex items-center font-medium">
                 <MapPin className="h-4 w-4 mr-2" />
                 {hoveredEvent.destinations.slice(0, 2).join(', ')}
                 {hoveredEvent.destinations.length > 2 && ` +${hoveredEvent.destinations.length - 2} more`}
@@ -374,14 +374,14 @@ export default function TripCalendar({
             )}
             
             {hoveredEvent.budget && (
-              <div className="flex items-center">
+              <div className="flex items-center font-medium">
                 <DollarSign className="h-4 w-4 mr-2" />
                 {hoveredEvent.currency} {hoveredEvent.budget.toLocaleString()}
               </div>
             )}
             
             {hoveredEvent.description && (
-              <p className="text-gray-700 mt-2">{hoveredEvent.description}</p>
+              <p className="text-gray-800 font-medium mt-2">{hoveredEvent.description}</p>
             )}
           </div>
         </div>
