@@ -46,9 +46,9 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
   };
 
   return (
-  <div className="bg-white/90 rounded-xl shadow-sm border border-purple-200/50 hover:shadow-lg transition-shadow overflow-hidden backdrop-blur-md">
+    <div className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow overflow-hidden">
       {/* Trip Image */}
-  <div className="relative h-48 bg-gradient-to-br from-purple-100 via-violet-100 to-purple-50">
+      <div className="relative h-48 bg-gradient-to-br from-green-100 to-purple-100">
         {trip.imageUrl ? (
           <img 
             src={trip.imageUrl} 
@@ -56,8 +56,8 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-violet-100">
-            <MapPin className="h-16 w-16 text-violet-300" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-100 to-violet-100">
+            <MapPin className="h-16 w-16 text-gray-400" />
           </div>
         )}
         
@@ -73,16 +73,18 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
 
       {/* Trip Details */}
       <div className="p-4">
-        <h3 className="font-semibold text-lg bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-2 line-clamp-2">
+        <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
           {trip.title}
         </h3>
+        
         <div className="space-y-2 mb-4">
-          <div className="flex items-center text-purple-600 text-sm">
+          <div className="flex items-center text-gray-600 text-sm">
             <MapPin className="h-4 w-4 mr-2" />
             <span>{trip.destination}</span>
           </div>
+          
           {trip.startDate && (
-            <div className="flex items-center text-purple-600 text-sm">
+            <div className="flex items-center text-gray-600 text-sm">
               <Calendar className="h-4 w-4 mr-2" />
               <span>
                 {formatDate(trip.startDate)}
@@ -90,17 +92,19 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
               </span>
             </div>
           )}
+          
           {trip.budget && (
-            <div className="flex items-center text-purple-600 text-sm">
+            <div className="flex items-center text-gray-600 text-sm">
               <DollarSign className="h-4 w-4 mr-2" />
               <span>${trip.budget.toLocaleString()}</span>
             </div>
           )}
         </div>
+
         {/* View Button */}
         <button
           onClick={handleViewClick}
-          className="w-full bg-gradient-to-r from-purple-500 to-violet-600 text-white py-2 px-4 rounded-lg hover:from-purple-600 hover:to-violet-700 transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-emerald-500 text-white py-2 px-4 rounded-lg hover:bg-emerald-600 transition-colors flex items-center justify-center gap-2"
         >
           <Eye className="h-4 w-4" />
           View Trip
