@@ -20,7 +20,7 @@
 
 Check out our demo video here:
 
-[Watch the GlobeTrotter Demo](link)
+[Watch the GlobeTrotter Demo](https://www.youtube.com/watch?v=DoYoeBB-J40)
 
 ---
 
