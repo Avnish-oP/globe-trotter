@@ -54,6 +54,16 @@ interface Trip {
   cover_image_url?: string;
   status: string;
   cities: string[];
+  stops?: Array<{
+    stop_id: string;
+    city_id: string;
+    city_name: string;
+    country_name: string;
+    latitude?: string;
+    longitude?: string;
+    arrival_date?: string;
+    departure_date?: string;
+  }>;
   created_by?: string;
   creator_id?: string;
 }
@@ -169,49 +179,104 @@ export default function DashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch all dashboard data in parallel
-      const [statsRes, tripsRes, citiesRes, recommendationsRes, allTripsRes] = await Promise.allSettled([
-        dashboardAPI.getDashboardData(),
-        dashboardAPI.getUpcomingTrips(),
-        dashboardAPI.getPopularCities(8), // Get more cities for regional section
-        dashboardAPI.getRecommendedDestinations(),
-        tripsAPI.getUserTrips()
-      ]);
-
-      // Handle stats
-      if (statsRes.status === 'fulfilled') {
-        setDashboardStats(statsRes.value.data);
+      // Fetch user trips first (this is the most reliable data source)
+      const userTripsRes = await tripsAPI.getUserTrips();
+      let userTrips: Trip[] = [];
+      
+      console.log('Dashboard: User trips response:', userTripsRes);
+      
+      // Handle different response formats from the API
+      if (userTripsRes && userTripsRes.success && userTripsRes.data) {
+        userTrips = userTripsRes.data;
+      } else if (userTripsRes && userTripsRes.trips) {
+        userTrips = userTripsRes.trips;
+      } else if (userTripsRes && Array.isArray(userTripsRes)) {
+        userTrips = userTripsRes;
+      } else {
+        console.warn('Unexpected user trips response format:', userTripsRes);
       }
-      setLoadingStates(prev => ({ ...prev, stats: false }));
-
-      // Handle trips
-      if (tripsRes.status === 'fulfilled') {
-        const allTrips = tripsRes.value.data;
+      
+      console.log('Dashboard: Processed user trips:', userTrips);
+      setAllTrips(userTrips);
+      
+      if (userTrips.length > 0) {
+        // Calculate stats from actual user trips
         const now = new Date();
-        const upcoming = allTrips.filter((trip: Trip) => new Date(trip.start_date) > now);
-        const previous = allTrips.filter((trip: Trip) => new Date(trip.end_date) < now);
+        console.log('Current date for comparison:', now);
         
+        const upcoming = userTrips.filter((trip: Trip) => {
+          const startDate = new Date(trip.start_date);
+          console.log(`Trip "${trip.title}": start_date=${trip.start_date}, parsed=${startDate}, isUpcoming=${startDate > now}`);
+          return startDate > now;
+        });
+        
+        const previous = userTrips.filter((trip: Trip) => {
+          const endDate = new Date(trip.end_date);
+          return endDate < now;
+        });
+        
+        const totalBudget = userTrips.reduce((sum: number, trip: Trip) => sum + (trip.total_budget || 0), 0);
+        
+        // Get unique countries from trip stops
+        const countries = new Set<string>();
+        userTrips.forEach((trip: Trip) => {
+          if (trip.stops && Array.isArray(trip.stops)) {
+            trip.stops.forEach((stop: any) => {
+              if (stop.country_name) {
+                countries.add(stop.country_name);
+              }
+            });
+          }
+        });
+        
+        // Set calculated stats
+        const calculatedStats = {
+          stats: {
+            totalTrips: userTrips.length,
+            upcomingTrips: upcoming.length,
+            totalBudget: totalBudget,
+            countriesVisited: countries.size
+          }
+        };
+        
+        console.log('Dashboard: Calculated stats:', calculatedStats);
+        setDashboardStats(calculatedStats);
         setUpcomingTrips(upcoming);
         setPreviousTrips(previous);
+      } else {
+        // No trips found, set empty stats
+        const emptyStats = {
+          stats: {
+            totalTrips: 0,
+            upcomingTrips: 0,
+            totalBudget: 0,
+            countriesVisited: 0
+          }
+        };
+        setDashboardStats(emptyStats);
+        setUpcomingTrips([]);
+        setPreviousTrips([]);
       }
-      setLoadingStates(prev => ({ ...prev, trips: false, previousTrips: false }));
+      
+      setLoadingStates(prev => ({ ...prev, stats: false, trips: false, previousTrips: false }));
+
+      // Fetch other dashboard data in parallel (these are optional)
+      const [citiesRes, recommendationsRes] = await Promise.allSettled([
+        dashboardAPI.getPopularCities(8), // Get more cities for regional section
+        dashboardAPI.getRecommendedDestinations()
+      ]);
 
       // Handle cities
       if (citiesRes.status === 'fulfilled') {
-        setPopularCities(citiesRes.value.data);
+        setPopularCities(citiesRes.value.data || []);
       }
       setLoadingStates(prev => ({ ...prev, cities: false }));
 
       // Handle recommendations
       if (recommendationsRes.status === 'fulfilled') {
-        setRecommendedDestinations(recommendationsRes.value.data);
+        setRecommendedDestinations(recommendationsRes.value.data || []);
       }
       setLoadingStates(prev => ({ ...prev, recommendations: false }));
-
-      // Handle all user trips for map and list
-      if (allTripsRes.status === 'fulfilled') {
-        setAllTrips(allTripsRes.value.data);
-      }
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);

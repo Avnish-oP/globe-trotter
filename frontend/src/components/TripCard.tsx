@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, MapPin, Calendar, DollarSign } from 'lucide-react';
+import { getPlaceImageUrl } from '@/lib/imageApi';
 
 interface TripCardProps {
   trip: {
@@ -18,6 +19,31 @@ interface TripCardProps {
 }
 
 export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
+  const [destinationImage, setDestinationImage] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDestinationImage = async () => {
+      if (trip.imageUrl) {
+        setDestinationImage(trip.imageUrl);
+        setImageLoading(false);
+        return;
+      }
+
+      try {
+        setImageLoading(true);
+        const imageUrl = await getPlaceImageUrl(trip.destination, 'regular');
+        setDestinationImage(imageUrl);
+      } catch (error) {
+        console.error('Error loading destination image:', error);
+      } finally {
+        setImageLoading(false);
+      }
+    };
+
+    loadDestinationImage();
+  }, [trip.destination, trip.imageUrl]);
+
   const handleViewClick = () => {
     if (onView) {
       onView(trip.id);
@@ -49,12 +75,25 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
   <div className="bg-white/90 rounded-xl shadow-sm border border-purple-200/50 hover:shadow-lg transition-shadow overflow-hidden backdrop-blur-md">
       {/* Trip Image */}
   <div className="relative h-48 bg-gradient-to-br from-purple-100 via-violet-100 to-purple-50">
-        {trip.imageUrl ? (
-          <img 
-            src={trip.imageUrl} 
-            alt={trip.title}
-            className="w-full h-full object-cover"
-          />
+        {imageLoading ? (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-violet-100">
+            <div className="animate-pulse">
+              <MapPin className="h-16 w-16 text-violet-300" />
+            </div>
+          </div>
+        ) : destinationImage ? (
+          <>
+            <img 
+              src={destinationImage} 
+              alt={trip.destination}
+              className="w-full h-full object-cover"
+              onError={() => setDestinationImage(null)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            <div className="absolute bottom-2 left-3 text-white">
+              <h4 className="font-semibold text-sm drop-shadow-lg">{trip.destination}</h4>
+            </div>
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-violet-100">
             <MapPin className="h-16 w-16 text-violet-300" />

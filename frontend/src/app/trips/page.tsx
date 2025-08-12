@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { tripsAPI } from '@/lib/api';
+import { getPlaceImageUrl } from '@/lib/imageApi';
 import Navigation from '@/components/Navigation';
 
 interface Trip {
@@ -26,6 +27,7 @@ export default function TripsPage() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tripImages, setTripImages] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     loadTrips();
@@ -38,7 +40,27 @@ export default function TripsPage() {
       const response = await tripsAPI.getUserTrips();
       
       if (response.success) {
-        setTrips(response.data || []);
+        const loadedTrips = response.data || [];
+        setTrips(loadedTrips);
+        
+        // Load images for each trip's first destination
+        const imageMap = new Map<string, string>();
+        
+        for (const trip of loadedTrips) {
+          if (trip.stops && trip.stops.length > 0) {
+            try {
+              const firstDestination = `${trip.stops[0].city_name}, ${trip.stops[0].country_name}`;
+              const imageUrl = await getPlaceImageUrl(firstDestination, 'regular');
+              if (imageUrl) {
+                imageMap.set(trip.trip_id, imageUrl);
+              }
+            } catch (error) {
+              console.error(`Error loading image for trip ${trip.trip_id}:`, error);
+            }
+          }
+        }
+        
+        setTripImages(imageMap);
       } else {
         setError('Failed to load trips');
       }
@@ -149,78 +171,121 @@ export default function TripsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trips.map((trip) => (
-              <div
-                key={trip.trip_id}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => router.push(`/trips/${trip.trip_id}`)}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {trip.title}
-                  </h3>
-                  <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(trip.status)}`}>
-                    {trip.status}
-                  </span>
-                </div>
-                
-                {trip.description && (
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                    {trip.description}
-                  </p>
-                )}
-                
-                <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <span className="font-medium">📅</span>
-                    <span className="ml-2">
-                      {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
-                    </span>
+            {trips.map((trip) => {
+              const tripImage = tripImages.get(trip.trip_id);
+              const firstDestination = trip.stops && trip.stops.length > 0 
+                ? `${trip.stops[0].city_name}, ${trip.stops[0].country_name}` 
+                : '';
+              
+              return (
+                <div
+                  key={trip.trip_id}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => router.push(`/trips/${trip.trip_id}`)}
+                >
+                  {/* Trip Image Header */}
+                  <div className="relative h-48 bg-gradient-to-br from-purple-100 to-violet-100">
+                    {tripImage ? (
+                      <>
+                        <img
+                          src={tripImage}
+                          alt={firstDestination}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                        <div className="absolute bottom-3 left-3 text-white">
+                          <h4 className="font-semibold text-sm drop-shadow-lg">{firstDestination}</h4>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="text-purple-300">
+                          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Status Badge */}
+                    <div className="absolute top-3 right-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(trip.status)}`}>
+                        {trip.status}
+                      </span>
+                    </div>
                   </div>
-                  
-                  {trip.total_budget && (
-                    <div className="flex items-center">
-                      <span className="font-medium">💰</span>
-                      <span className="ml-2">
-                        {trip.currency} {trip.total_budget.toLocaleString()}
-                      </span>
+
+                  {/* Trip Content */}
+                  <div className="p-6">
+                    <div className="mb-3">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">
+                        {trip.title}
+                      </h3>
                     </div>
-                  )}
-                  
-                  {trip.stops && trip.stops.length > 0 && (
-                    <div className="flex items-center">
-                      <span className="font-medium">📍</span>
-                      <span className="ml-2 truncate">
-                        {trip.stops.slice(0, 2).map(stop => `${stop.city_name}, ${stop.country_name}`).join(' • ')}
-                        {trip.stops.length > 2 && ` +${trip.stops.length - 2} more`}
-                      </span>
+                    
+                    {trip.description && (
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {trip.description}
+                      </p>
+                    )}
+                    
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <span className="font-medium">📅</span>
+                        <span className="ml-2">
+                          {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+                        </span>
+                      </div>
+                      
+                      {trip.total_budget && (
+                        <div className="flex items-center">
+                          <span className="font-medium">💰</span>
+                          <span className="ml-2">
+                            {trip.currency} {trip.total_budget.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {trip.stops && trip.stops.length > 0 && (
+                        <div className="flex items-center">
+                          <span className="font-medium">📍</span>
+                          <span className="ml-2 truncate">
+                            {trip.stops.slice(0, 2).map(stop => `${stop.city_name}, ${stop.country_name}`).join(' • ')}
+                            {trip.stops.length > 2 && ` +${trip.stops.length - 2} more`}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  )}
+                    
+                    <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/trips/${trip.trip_id}`);
+                        }}
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      >
+                        View Details
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Navigate directly to sections tab
+                          router.push(`/trips/${trip.trip_id}?tab=sections`);
+                        }}
+                        className="text-green-600 hover:text-green-700 text-sm font-medium"
+                      >
+                        Manage Sections
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      router.push(`/trips/${trip.trip_id}`);
-                    }}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                  >
-                    View Details
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Navigate directly to sections tab
-                      router.push(`/trips/${trip.trip_id}?tab=sections`);
-                    }}
-                    className="text-green-600 hover:text-green-700 text-sm font-medium"
-                  >
-                    Manage Sections
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

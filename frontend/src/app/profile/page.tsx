@@ -11,56 +11,55 @@ import {
   User,
   Plane,
   Calendar,
-  DollarSign
+  DollarSign,
+  Clock,
+  Star,
+  Heart,
+  Settings
 } from 'lucide-react';
 import { TripCard } from '@/components/TripCard';
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
+import { tripsAPI } from '@/lib/api';
 
-// Mock data for trips - replace with actual API calls
-const mockTrips = {
-  planned: [
-    {
-      id: '1',
-      title: 'European Adventure',
-      destination: 'Paris, Rome, Barcelona',
-      imageUrl: '/public/placeholder-trip-1.jpg',
-      startDate: '2025-06-15',
-      endDate: '2025-06-30',
-      budget: 3500,
-      status: 'planned' as const
-    },
-    {
-      id: '2',
-      title: 'Asian Discovery',
-      destination: 'Tokyo, Seoul, Bangkok',
-      startDate: '2025-09-10',
-      endDate: '2025-09-25',
-      budget: 4200,
-      status: 'planned' as const
-    }
-  ],
-  previous: [
-    {
-      id: '3',
-      title: 'California Coast Road Trip',
-      destination: 'San Francisco, Los Angeles, San Diego',
-      imageUrl: '/public/placeholder-trip-2.jpg',
-      startDate: '2024-08-05',
-      endDate: '2024-08-20',
-      budget: 2800,
-      status: 'completed' as const
-    },
-    {
-      id: '4',
-      title: 'New York City Weekend',
-      destination: 'New York, NY',
-      startDate: '2024-12-15',
-      endDate: '2024-12-18',
-      budget: 1200,
-      status: 'completed' as const
-    }
-  ]
-};
+interface Trip {
+  id: string;
+  trip_id?: string;
+  title: string;
+  description?: string;
+  start_date: string;
+  end_date: string;
+  total_budget?: number;
+  currency: string;
+  image_url?: string;
+  destinations?: Array<{
+    name: string;
+    country: string;
+    type: string;
+  }>;
+  stops?: Array<{
+    stop_id: string;
+    city_id: string;
+    city_name: string;
+    country_name: string;
+    latitude?: string;
+    longitude?: string;
+    arrival_date?: string;
+    departure_date?: string;
+  }>;
+  status?: 'planned' | 'completed' | 'ongoing';
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface UserStats {
+  totalTrips: number;
+  plannedTrips: number;
+  completedTrips: number;
+  totalBudget: number;
+  countries_visited: number;
+  cities_visited: number;
+  favorite_destinations: string[];
+}
 
 // Doodle SVGs for background
 const doodleSvgs = [
@@ -110,6 +109,113 @@ export default function ProfilePage() {
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'planned' | 'previous'>('planned');
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [userStats, setUserStats] = useState<UserStats>({
+    totalTrips: 0,
+    plannedTrips: 0,
+    completedTrips: 0,
+    totalBudget: 0,
+    countries_visited: 0,
+    cities_visited: 0,
+    favorite_destinations: []
+  });
+  const [tripsLoading, setTripsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch user trips and calculate stats
+  useEffect(() => {
+    const fetchUserTrips = async () => {
+      if (!user) return;
+      
+      setTripsLoading(true);
+      setError(null);
+      try {
+        console.log('Fetching user trips...');
+        const response = await tripsAPI.getUserTrips();
+        console.log('User trips response:', response);
+        
+        // Check different possible response structures
+        let userTrips: Trip[] = [];
+        if (response && response.success && response.data) {
+          userTrips = response.data;
+        } else if (response && response.trips) {
+          userTrips = response.trips;
+        } else if (response && Array.isArray(response)) {
+          userTrips = response;
+        } else {
+          console.warn('Unexpected trips response structure:', response);
+        }
+        
+        console.log('Processed user trips:', userTrips);
+        setTrips(userTrips);
+
+        // Calculate user stats
+        const currentDate = new Date();
+        console.log('Current date for comparison:', currentDate);
+        
+        const planned = userTrips.filter((trip: Trip) => {
+          const startDate = new Date(trip.start_date);
+          console.log(`Trip "${trip.title}": start_date=${trip.start_date}, parsed=${startDate}, isPlanned=${startDate > currentDate}`);
+          return startDate > currentDate;
+        });
+        
+        const completed = userTrips.filter((trip: Trip) => {
+          const endDate = new Date(trip.end_date);
+          return endDate < currentDate;
+        });
+        
+        const totalBudget = userTrips.reduce((sum: number, trip: Trip) => sum + (trip.total_budget || 0), 0);
+        
+        // Calculate unique countries and cities from stops data
+        const allCountries = new Set<string>();
+        const allCities = new Set<string>();
+        
+        userTrips.forEach((trip: Trip) => {
+          if (trip.stops && Array.isArray(trip.stops)) {
+            trip.stops.forEach((stop: any) => {
+              if (stop.country_name) {
+                allCountries.add(stop.country_name);
+              }
+              if (stop.city_name) {
+                allCities.add(stop.city_name);
+              }
+            });
+          }
+          // Fallback to destinations if stops is not available
+          else if (trip.destinations && Array.isArray(trip.destinations)) {
+            trip.destinations.forEach((dest: any) => {
+              if (dest.country) {
+                allCountries.add(dest.country);
+              }
+              if (dest.name) {
+                allCities.add(dest.name);
+              }
+            });
+          }
+        });
+        
+        const calculatedStats = {
+          totalTrips: userTrips.length,
+          plannedTrips: planned.length,
+          completedTrips: completed.length,
+          totalBudget,
+          countries_visited: allCountries.size,
+          cities_visited: allCities.size,
+          favorite_destinations: Array.from(allCities).slice(0, 5) // Top 5 most visited
+        };
+        
+        console.log('Calculated stats:', calculatedStats);
+        setUserStats(calculatedStats);
+      } catch (error) {
+        console.error('Failed to fetch user trips:', error);
+        setError('Failed to load trips. Please try again later.');
+      } finally {
+        setTripsLoading(false);
+      }
+    };
+
+    fetchUserTrips();
+  }, [user]);
 
   // Handle profile picture change
   const handleProfilePictureChange = (newUrl: string | null) => {
@@ -150,9 +256,33 @@ export default function ProfilePage() {
     return null; // Will redirect to login
   }
 
-  const totalTrips = mockTrips.planned.length + mockTrips.previous.length;
-  const plannedTrips = mockTrips.planned;
-  const previousTrips = mockTrips.previous;
+  // Filter trips based on current date
+  const currentDate = new Date();
+  const plannedTrips = trips.filter(trip => new Date(trip.start_date) > currentDate);
+  const previousTrips = trips.filter(trip => new Date(trip.end_date) < currentDate);
+
+  // Convert Trip format to TripCard format
+  const convertTripForCard = (trip: Trip) => {
+    // Get destination string from stops or destinations
+    let destination = 'No destination';
+    
+    if (trip.stops && trip.stops.length > 0) {
+      destination = trip.stops.map(stop => stop.city_name).join(', ');
+    } else if (trip.destinations && trip.destinations.length > 0) {
+      destination = trip.destinations.map(dest => dest.name).join(', ');
+    }
+    
+    return {
+      id: trip.id || trip.trip_id || '',
+      title: trip.title,
+      destination,
+      imageUrl: trip.image_url,
+      startDate: trip.start_date,
+      endDate: trip.end_date,
+      budget: trip.total_budget,
+      status: new Date(trip.end_date) < currentDate ? 'completed' as const : 'planned' as const
+    };
+  };
 
   return (
     <div className="min-h-screen relative font-sans bg-[#f5f3ff] overflow-hidden">
@@ -239,7 +369,7 @@ export default function ProfilePage() {
             {/* Right Side - Total Trips */}
             <div className="text-center">
         <div className="bg-gradient-to-r from-purple-100 to-violet-100 rounded-lg p-4 min-w-[120px]">
-          <div className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-1">{totalTrips}</div>
+          <div className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-1">{userStats.totalTrips}</div>
           <div className="text-sm text-purple-600">Total Trips</div>
               </div>
             </div>
@@ -261,15 +391,58 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
+
+          {/* Additional Profile Information */}
+          <div className="mt-6 pt-6 border-t border-purple-200/50">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Travel Experience */}
+              {user.travel_experience_level && (
+                <div>
+                  <h3 className="text-sm font-medium text-purple-700 mb-2">Travel Experience</h3>
+                  <div className="flex items-center">
+                    <Star className="h-4 w-4 text-purple-500 mr-2" />
+                    <span className="text-purple-600 capitalize">{user.travel_experience_level}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Preferred Currency */}
+              {user.preferred_currency && (
+                <div>
+                  <h3 className="text-sm font-medium text-purple-700 mb-2">Preferred Currency</h3>
+                  <div className="flex items-center">
+                    <DollarSign className="h-4 w-4 text-purple-500 mr-2" />
+                    <span className="text-purple-600">{user.preferred_currency}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Joined Date */}
+            {user.created_at && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium text-purple-700 mb-2">Member Since</h3>
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 text-purple-500 mr-2" />
+                  <span className="text-purple-600">
+                    {new Date(user.created_at).toLocaleDateString('en-US', { 
+                      month: 'long', 
+                      year: 'numeric' 
+                    })}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Trip Statistics */}
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white/90 p-6 rounded-xl shadow-sm border border-purple-200/50 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-purple-600 text-sm">Planned Trips</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">{plannedTrips.length}</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">{userStats.plannedTrips}</p>
               </div>
               <Calendar className="h-12 w-12 text-violet-500" />
             </div>
@@ -279,7 +452,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-purple-600 text-sm">Completed Trips</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">{previousTrips.length}</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">{userStats.completedTrips}</p>
               </div>
               <MapPin className="h-12 w-12 text-purple-500" />
             </div>
@@ -290,10 +463,20 @@ export default function ProfilePage() {
               <div>
                 <p className="text-purple-600 text-sm">Total Budget</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">
-                  ${([...plannedTrips, ...previousTrips].reduce((sum, trip) => sum + (trip.budget || 0), 0)).toLocaleString()}
+                  ${userStats.totalBudget.toLocaleString()}
                 </p>
               </div>
               <DollarSign className="h-12 w-12 text-violet-500" />
+            </div>
+          </div>
+
+          <div className="bg-white/90 p-6 rounded-xl shadow-sm border border-purple-200/50 backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-600 text-sm">Countries Visited</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">{userStats.countries_visited}</p>
+              </div>
+              <Star className="h-12 w-12 text-violet-500" />
             </div>
           </div>
         </div>
@@ -310,7 +493,7 @@ export default function ProfilePage() {
                   : 'text-purple-600 hover:text-purple-900'
               }`}
             >
-              Planned Trips ({plannedTrips.length})
+              Planned Trips ({userStats.plannedTrips})
             </button>
             <button
               onClick={() => setActiveTab('previous')}
@@ -320,52 +503,74 @@ export default function ProfilePage() {
                   : 'text-purple-600 hover:text-purple-900'
               }`}
             >
-              Previous Trips ({previousTrips.length})
+              Previous Trips ({userStats.completedTrips})
             </button>
           </div>
 
-          {/* Trip Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeTab === 'planned' ? (
-              plannedTrips.length > 0 ? (
-                plannedTrips.map((trip) => (
-                  <TripCard
-                    key={trip.id}
-                    trip={trip}
-                    onView={handleViewTrip}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">No planned trips yet</h4>
-                  <p className="text-gray-600 mb-6">Start planning your next adventure!</p>
-                  <button 
-                    onClick={() => router.push('/trips/new')}
-                    className="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition-colors"
-                  >
-                    Plan New Trip
-                  </button>
+          {/* Error State */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center">
+                <div className="text-red-800">
+                  <p className="font-medium">Unable to load trips</p>
+                  <p className="text-sm">{error}</p>
                 </div>
-              )
-            ) : (
-              previousTrips.length > 0 ? (
-                previousTrips.map((trip) => (
-                  <TripCard
-                    key={trip.id}
-                    trip={trip}
-                    onView={handleViewTrip}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">No previous trips</h4>
-                  <p className="text-gray-600">Your completed trips will appear here.</p>
-                </div>
-              )
-            )}
-          </div>
+              </div>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {tripsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+              <span className="ml-3 text-purple-600">Loading trips...</span>
+            </div>
+          ) : (
+            <>
+              {/* Trip Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {activeTab === 'planned' ? (
+                  plannedTrips.length > 0 ? (
+                    plannedTrips.map((trip) => (
+                      <TripCard
+                        key={trip.id}
+                        trip={convertTripForCard(trip)}
+                        onView={handleViewTrip}
+                      />
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12">
+                      <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h4 className="text-lg font-medium text-gray-900 mb-2">No planned trips yet</h4>
+                      <p className="text-gray-600 mb-6">Start planning your next adventure!</p>
+                      <button 
+                        onClick={() => router.push('/trips/new')}
+                        className="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition-colors"
+                      >
+                        Plan New Trip
+                      </button>
+                    </div>
+                  )
+                ) : (
+                  previousTrips.length > 0 ? (
+                    previousTrips.map((trip) => (
+                      <TripCard
+                        key={trip.id}
+                        trip={convertTripForCard(trip)}
+                        onView={handleViewTrip}
+                      />
+                    ))
+                  ) : (
+                    <div className="col-span-full text-center py-12">
+                      <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h4 className="text-lg font-medium text-gray-900 mb-2">No previous trips</h4>
+                      <p className="text-gray-600">Your completed trips will appear here.</p>
+                    </div>
+                  )
+                )}
+              </div>
+            </>
+          )}
         </div>
       </main>
     </div>

@@ -3,11 +3,37 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { X, Share2 } from 'lucide-react';
-import { tripsAPI } from '@/lib/api';
+import { tripsAPI, sectionsAPI } from '@/lib/api';
 import TripSections from '@/components/sections/TripSections';
 import SharingModal from '@/components/sharing/SharingModal';
-import TripTimeline from '@/components/TripTimeline';
+import EnhancedTripTimeline from '@/components/EnhancedTripTimeline';
+import TripOverviewMap from '@/components/sections/TripOverviewMap';
 import Navigation from '@/components/Navigation';
+
+interface TripSection {
+  section_id: string;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  location: string;
+  budget_level: 'low' | 'medium' | 'high';
+  places?: Place[];
+}
+
+interface Place {
+  place_id?: string;
+  name: string;
+  description?: string;
+  latitude?: number;
+  longitude?: number;
+  estimated_cost?: string;
+  popularity?: string;
+  category?: string;
+  address?: string;
+  image_url?: string;
+  is_selected?: boolean;
+}
 
 interface Trip {
   trip_id: string;
@@ -37,6 +63,7 @@ export default function TripDetailPage() {
   const tripId = params.tripId as string;
   
   const [trip, setTrip] = useState<Trip | null>(null);
+  const [sections, setSections] = useState<TripSection[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'sections'>('overview');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,13 +93,23 @@ export default function TripDetailPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await tripsAPI.getTripById(tripId);
       
-      if (response.success) {
-        setTrip(response.data);
+      // Load trip and sections in parallel
+      const [tripResponse, sectionsResponse] = await Promise.allSettled([
+        tripsAPI.getTripById(tripId),
+        sectionsAPI.getTripSections(tripId)
+      ]);
+      
+      if (tripResponse.status === 'fulfilled' && tripResponse.value.success) {
+        setTrip(tripResponse.value.data);
       } else {
         setError('Failed to load trip details');
       }
+      
+      if (sectionsResponse.status === 'fulfilled' && sectionsResponse.value.success) {
+        setSections(sectionsResponse.value.data || []);
+      }
+      
     } catch (error) {
       console.error('Error loading trip:', error);
       setError('Failed to load trip details');
@@ -237,15 +274,57 @@ export default function TripDetailPage() {
         {activeTab === 'overview' && (
           <div className="max-w-6xl mx-auto px-6 space-y-8">
             {/* Interactive Timeline */}
-            {trip.stops && trip.stops.length > 0 && (
+            {(trip.stops && trip.stops.length > 0) || (sections && sections.length > 0) ? (
               <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-200/50 p-6">
                 <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-6">
                   Trip Timeline
                 </h2>
-                <TripTimeline 
-                  stops={trip.stops}
+                <EnhancedTripTimeline 
+                  stops={trip.stops || []}
+                  sections={sections}
                   tripStartDate={trip.start_date}
                   tripEndDate={trip.end_date}
+                />
+              </div>
+            ) : (
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-200/50 p-6">
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-6">
+                  Trip Timeline
+                </h2>
+                <div className="text-center py-12">
+                  <div className="text-purple-300 mb-6">
+                    <svg className="w-20 h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">No itinerary planned yet</h3>
+                  <p className="text-gray-500 mb-6">Add sections and places to your trip to see them on the timeline</p>
+                  <button
+                    onClick={() => setActiveTab('sections')}
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:from-purple-700 hover:to-violet-700 transition-all duration-200 shadow-lg"
+                  >
+                    Start Planning
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Trip Overview Map */}
+            {(sections && sections.length > 0) && (
+              <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-200/50 p-6">
+                <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-6">
+                  Trip Map Overview
+                </h2>
+                <TripOverviewMap 
+                  sections={sections}
+                  onSectionSelect={(section) => {
+                    // You can add section selection logic here if needed
+                    console.log('Selected section:', section);
+                  }}
+                  onPlaceSelect={(place) => {
+                    // You can add place selection logic here if needed
+                    console.log('Selected place:', place);
+                  }}
                 />
               </div>
             )}
