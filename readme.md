@@ -1,8 +1,27 @@
-#Team Member
--Avnish kumar
--Sanskriti rai
--kavyanshi gera
--Bimlesh
+# GlobeTrotter – Empowering Personalized Travel Planning
+---
 
-Problem statement
- GlobeTrotter – Empowering Personalized Travel Planning(ps-2)
+### **Team Members** 👥
+
+- **Avnish Kumar**
+- **Sanskriti Rai**
+- **Kavyanshi Gera**
+- **Bimlesh**
+
+---
+
+## **Problem Statement** 💡
+
+**GlobeTrotter** – Empowering Personalized Travel Planning (PS-2)
+
+---
+
+## **Video Link** 🎥
+
+Check out our demo video here:
+
+[Watch the GlobeTrotter Demo](link)
+
+---
+
+### Thank you for exploring **GlobeTrotter**! 🌟
