@@ -407,8 +407,7 @@ export default function DashboardPage() {
                       <span className="status-info">{trip.status}</span>
                     </div>
                   </div>
-                  
-                  <div className="space-y-3">
+                  <div className="space-y-3 p-4">
                     <div>
                       <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                         {trip.title}
@@ -417,40 +416,15 @@ export default function DashboardPage() {
                         {trip.description}
                       </p>
                     </div>
-                    
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center text-muted-foreground">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {formatDate(trip.start_date)}
+                        {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
                       </div>
                       <div className="font-semibold text-primary">
                         {formatCurrency(trip.total_budget, trip.currency)}
                       </div>
                     </div>
-                    
-                    {trip.cities && trip.cities.length > 0 && (
-                      <div className="flex items-center text-caption text-muted-foreground">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {trip.cities.slice(0, 2).join(', ')}
-                        {trip.cities.length > 2 && ` +${trip.cities.length - 2} more`}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <MapPin className="h-8 w-8 text-primary" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-semibold text-foreground mb-1">{trip.title}</h4>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
-                    </p>
-                    <p className="text-sm text-primary font-medium">
-                      {formatCurrency(trip.total_budget, trip.currency)}
-                    </p>
                     {trip.cities && trip.cities.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {trip.cities.slice(0, 3).map((city, index) => (
@@ -585,7 +559,7 @@ export default function DashboardPage() {
                 setSearchQuery(e.target.value);
                 handleSearch(e.target.value);
               }}
-              className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary/40 focus:border-primary/50 transition-colors"
+              className="w-full pl-10 pr-4 py-3 border border-border rounded-xl  bg-lavender/90 text-black focus:ring-2 focus:ring-lavender/400 focus:border-primary/50 transition-colors"
             />
           </div>
 

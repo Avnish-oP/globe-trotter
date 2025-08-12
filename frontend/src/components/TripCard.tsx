@@ -62,17 +62,17 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-emerald-500/90 text-white';
       case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-500/90 text-white';
       case 'planned':
       default:
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-amber-500/90 text-white';
     }
   };
 
   return (
-  <div className="bg-white/90 rounded-xl shadow-sm border border-purple-200/50 hover:shadow-lg transition-shadow overflow-hidden backdrop-blur-md">
+    <div className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow overflow-hidden">
       {/* Trip Image */}
   <div className="relative h-48 bg-gradient-to-br from-purple-100 via-violet-100 to-purple-50">
         {imageLoading ? (
@@ -95,54 +95,69 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
             </div>
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-violet-100">
-            <MapPin className="h-16 w-16 text-violet-300" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-400 via-violet-400 to-indigo-400">
+            <MapPin className="h-16 w-16 text-white/80" />
           </div>
         )}
         
-        {/* Status Badge */}
+        {/* Enhanced gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+        
+        {/* Enhanced Status Badge */}
         {trip.status && (
-          <div className="absolute top-3 right-3">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(trip.status)}`}>
+          <div className="absolute top-4 right-4">
+            <span className={`px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md border border-white/20 ${getStatusColor(trip.status)}`}>
               {trip.status === 'in-progress' ? 'In Progress' : trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}
             </span>
           </div>
         )}
       </div>
 
-      {/* Trip Details */}
-      <div className="p-4">
-        <h3 className="font-semibold text-lg bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-2 line-clamp-2">
+      {/* Enhanced Trip Details */}
+      <div className="p-6">
+        <h3 className="font-black text-xl text-gray-900 mb-3 line-clamp-2 group-hover:text-purple-700 transition-colors">
           {trip.title}
         </h3>
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-purple-600 text-sm">
-            <MapPin className="h-4 w-4 mr-2" />
-            <span>{trip.destination}</span>
+        
+        <div className="space-y-3 mb-6">
+          <div className="flex items-center text-gray-600 group-hover:text-purple-600 transition-colors">
+            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+              <MapPin className="h-4 w-4 text-purple-600" />
+            </div>
+            <span className="font-medium">{trip.destination}</span>
           </div>
+          
+          
           {trip.startDate && (
-            <div className="flex items-center text-purple-600 text-sm">
-              <Calendar className="h-4 w-4 mr-2" />
-              <span>
+            <div className="flex items-center text-gray-600 group-hover:text-purple-600 transition-colors">
+              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                <Calendar className="h-4 w-4 text-indigo-600" />
+              </div>
+              <span className="font-medium">
                 {formatDate(trip.startDate)}
                 {trip.endDate && ` - ${formatDate(trip.endDate)}`}
               </span>
             </div>
           )}
+          
+          
           {trip.budget && (
-            <div className="flex items-center text-purple-600 text-sm">
-              <DollarSign className="h-4 w-4 mr-2" />
-              <span>${trip.budget.toLocaleString()}</span>
+            <div className="flex items-center text-gray-600 group-hover:text-purple-600 transition-colors">
+              <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                <DollarSign className="h-4 w-4 text-emerald-600" />
+              </div>
+              <span className="font-bold text-emerald-700">${trip.budget.toLocaleString()}</span>
             </div>
           )}
         </div>
-        {/* View Button */}
+        
+        {/* Enhanced View Button */}
         <button
           onClick={handleViewClick}
-          className="w-full bg-gradient-to-r from-purple-500 to-violet-600 text-white py-2 px-4 rounded-lg hover:from-purple-600 hover:to-violet-700 transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl group-hover:-translate-y-0.5"
         >
           <Eye className="h-4 w-4" />
-          View Trip
+          View Details
         </button>
       </div>
     </div>

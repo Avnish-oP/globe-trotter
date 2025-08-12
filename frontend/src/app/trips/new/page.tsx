@@ -1,3 +1,4 @@
+// ...existing code...
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -306,7 +307,7 @@ export default function CreateTripPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 lg:px-8 py-8 relative z-10">
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-100 p-8">
+  <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-[0_4px_32px_0_rgba(180,140,255,0.15)] border-2 border-[#C3B1E1] p-8">
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Trip Title */}
             <div className="space-y-4">
@@ -526,6 +527,7 @@ export default function CreateTripPage() {
                       onChange={(e) => handleInputChange('currency', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-purple-400 focus:border-purple-500 transition-colors appearance-none cursor-pointer"
                     >
+                      <option value="INR">INR (₹)</option>
                       <option value="USD">USD ($)</option>
                       <option value="EUR">EUR (€)</option>
                       <option value="GBP">GBP (£)</option>
@@ -539,116 +541,117 @@ export default function CreateTripPage() {
               </div>
             </div>
 
-          {/* Privacy & Sharing */}
-          <div className="card-elevated bg-white/95 backdrop-blur-sm">
-            <div className="mb-6">
-              <h2 className="text-heading-md text-foreground font-bold mb-2">Privacy & Sharing</h2>
-              <p className="text-caption text-muted-foreground">Control who can see and interact with your trip</p>
-            </div>
-
-            <div className="space-y-6">
-              {/* Visibility Settings */}
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-3">
-                  Trip Visibility
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {[
-                    { 
-                      value: 'private', 
-                      label: 'Private', 
-                      description: 'Only you can see this trip',
-                      icon: '🔒'
-                    },
-                    { 
-                      value: 'public', 
-                      label: 'Public', 
-                      description: 'Anyone can discover and view this trip',
-                      icon: '🌍'
-                    },
-                    { 
-                      value: 'unlisted', 
-                      label: 'Unlisted', 
-                      description: 'Only people with the link can view',
-                      icon: '🔗'
-                    },
-                    { 
-                      value: 'friends_only', 
-                      label: 'Friends Only', 
-                      description: 'Only your friends can see this trip',
-                      icon: '👥'
-                    }
-                  ].map((option) => (
-                    <label 
-                      key={option.value}
-                      className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-primary/30 ${
-                        formData.visibility === option.value 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-gray-200 bg-white'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="visibility"
-                        value={option.value}
-                        checked={formData.visibility === option.value}
-                        onChange={(e) => handleInputChange('visibility', e.target.value as any)}
-                        className="sr-only"
-                      />
-                      <div className="flex items-start space-x-3 w-full">
-                        <span className="text-xl">{option.icon}</span>
-                        <div className="flex-1">
-                          <div className="font-medium text-foreground">{option.label}</div>
-                          <div className="text-sm text-muted-foreground">{option.description}</div>
-                        </div>
-                        {formData.visibility === option.value && (
-                          <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                            <div className="h-2 w-2 rounded-full bg-white"></div>
-                          </div>
-                        )}
-                      </div>
+            {/* Privacy & Sharing */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                Privacy & Sharing
+              </h3>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 p-6">
+                <div className="space-y-6">
+                  {/* Visibility Settings */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Trip Visibility
                     </label>
-                  ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {[
+                        { 
+                          value: 'private', 
+                          label: 'Private', 
+                          description: 'Only you can see this trip',
+                          icon: '🔒'
+                        },
+                        { 
+                          value: 'public', 
+                          label: 'Public', 
+                          description: 'Anyone can discover and view this trip',
+                          icon: '🌍'
+                        },
+                        { 
+                          value: 'unlisted', 
+                          label: 'Unlisted', 
+                          description: 'Only people with the link can view',
+                          icon: '🔗'
+                        },
+                        { 
+                          value: 'friends_only', 
+                          label: 'Friends Only', 
+                          description: 'Only your friends can see this trip',
+                          icon: '👥'
+                        }
+                      ].map((option) => (
+                        <label 
+                          key={option.value}
+                          className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-400/70 ${
+                            formData.visibility === option.value 
+                              ? 'border-purple-500 bg-purple-50' 
+                              : 'border-gray-200 bg-white'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="visibility"
+                            value={option.value}
+                            checked={formData.visibility === option.value}
+                            onChange={(e) => handleInputChange('visibility', e.target.value as any)}
+                            className="sr-only"
+                          />
+                          <div className="flex items-start space-x-3 w-full">
+                            <span className="text-xl">{option.icon}</span>
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900">{option.label}</div>
+                              <div className="text-sm text-gray-600">{option.description}</div>
+                            </div>
+                            {formData.visibility === option.value && (
+                              <div className="h-5 w-5 rounded-full bg-purple-500 flex items-center justify-center">
+                                <div className="h-2 w-2 rounded-full bg-white"></div>
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Additional Settings for Public/Unlisted */}
+                  {(formData.visibility === 'public' || formData.visibility === 'unlisted') && (
+                    <div className="border-t border-purple-100 pt-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Interaction Settings
+                      </label>
+                      <div className="space-y-4">
+                        <label className="flex items-start space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.allowComments}
+                            onChange={(e) => handleInputChange('allowComments', e.target.checked)}
+                            className="mt-1 h-4 w-4 text-purple-500 focus:ring-purple-500 border-gray-300 rounded"
+                          />
+                          <div>
+                            <div className="font-medium text-gray-900">Allow Comments</div>
+                            <div className="text-sm text-gray-600">Let others comment on your trip and suggest improvements</div>
+                          </div>
+                        </label>
+                        
+                        <label className="flex items-start space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.allowCloning}
+                            onChange={(e) => handleInputChange('allowCloning', e.target.checked)}
+                            className="mt-1 h-4 w-4 text-purple-500 focus:ring-purple-500 border-gray-300 rounded"
+                          />
+                          <div>
+                            <div className="font-medium text-gray-900">Allow Cloning</div>
+                            <div className="text-sm text-gray-600">Let others use your trip as a template for their own</div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Additional Settings for Public/Unlisted */}
-              {(formData.visibility === 'public' || formData.visibility === 'unlisted') && (
-                <div className="border-t pt-6">
-                  <label className="block text-sm font-semibold text-foreground mb-3">
-                    Interaction Settings
-                  </label>
-                  <div className="space-y-4">
-                    <label className="flex items-start space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.allowComments}
-                        onChange={(e) => handleInputChange('allowComments', e.target.checked)}
-                        className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                      />
-                      <div>
-                        <div className="font-medium text-foreground">Allow Comments</div>
-                        <div className="text-sm text-muted-foreground">Let others comment on your trip and suggest improvements</div>
-                      </div>
-                    </label>
-                    
-                    <label className="flex items-start space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.allowCloning}
-                        onChange={(e) => handleInputChange('allowCloning', e.target.checked)}
-                        className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                      />
-                      <div>
-                        <div className="font-medium text-foreground">Allow Cloning</div>
-                        <div className="text-sm text-muted-foreground">Let others use your trip as a template for their own</div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              )}
             </div>
-          </div>
 
             {/* Error Message */}
             {errors.submit && (

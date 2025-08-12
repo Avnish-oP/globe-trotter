@@ -117,7 +117,7 @@ export default function Navigation({ currentPage = 'dashboard', showCreateButton
                     <span>Profile</span>
                   </button>
                   <button
-                    onClick={() => router.push('/settings')}
+                    onClick={() => router.push('/profile/edit')}
                     className="flex items-center space-x-3 w-full px-4 py-2 text-left text-gray-700 hover:bg-purple-50 transition-colors"
                   >
                     <Settings className="h-4 w-4 text-purple-500" />

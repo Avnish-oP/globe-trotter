@@ -180,8 +180,8 @@ export default function DashboardPage() {
     });
   };
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
+  const formatCurrency = (amount: number, currency: string = 'INR') => {
+    return new Intl.NumberFormat('en-INR', {
       style: 'currency',
       currency: currency
     }).format(amount);
@@ -572,7 +572,7 @@ export default function DashboardPage() {
                 setSearchQuery(e.target.value);
                 handleSearch(e.target.value);
               }}
-              className="input-field pl-12 text-sm"
+              className="input-field pl-12 text-sm text-black"
             />
           </div>
 

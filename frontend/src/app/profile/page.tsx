@@ -285,53 +285,80 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen relative font-sans bg-[#f5f3ff] overflow-hidden">
-      {/* Blurred mountain hiker background */}
-      <div
-        className="fixed inset-0 w-full h-full bg-cover bg-center blur-[6px] opacity-60 -z-20"
-        style={{ backgroundImage: "url('/mountain-hiker-bg.png')" }}
-        aria-hidden="true"
-      />
-      {/* Doodle SVGs background */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <DoodleBackground count={40} />
+    <div className="min-h-screen relative font-sans bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      {/* Enhanced gradient overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-100/20 via-transparent to-indigo-100/20 pointer-events-none" />
+      
+      {/* Floating decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-4 -right-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-8 -left-4 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-violet-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Header */}
-      <header className="bg-white/90 shadow-sm border-b border-purple-200/50 backdrop-blur-md relative z-10">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 shadow-lg shadow-purple-500/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16">
-            <button
-              onClick={handleBackToDashboard}
-              className="mr-4 p-2 text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-100"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <Plane className="h-8 w-8 text-violet-500 mr-2" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">GlobeTrotter</h1>
+              <button
+                onClick={handleBackToDashboard}
+                className="mr-4 p-2 text-gray-600 hover:text-purple-700 transition-all duration-200 rounded-xl hover:bg-purple-50 group"
+              >
+                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
+              </button>
+              
+              <div className="flex items-center">
+                <div className="relative">
+                  <Plane className="h-8 w-8 text-purple-600 mr-2 transform transition-transform hover:rotate-12" />
+                  <div className="absolute inset-0 bg-purple-600 rounded-full blur-lg opacity-20"></div>
+                </div>
+                <h1 className="text-2xl font-black bg-gradient-to-r from-purple-700 via-violet-700 to-indigo-700 bg-clip-text text-transparent">
+                  GlobeTrotter
+                </h1>
+              </div>
+            </div>
+            
+            {/* Quick actions */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleEditProfile}
+                className="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl transition-all duration-200 flex items-center gap-2 group"
+              >
+                <Edit3 className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+                Edit Profile
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-  <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        {/* Profile Header */}
-  <div className="bg-white/90 rounded-xl shadow-sm border border-purple-200/50 p-6 mb-8 backdrop-blur-md">
-          <div className="flex items-start justify-between">
-            {/* Left Side - Profile Info */}
-            <div className="flex items-start space-x-6">
-              {/* Profile Picture */}
-              <div className="relative">
-                <ProfilePictureUpload
-                  currentImageUrl={user.profile_picture_url}
-                  onImageChange={handleProfilePictureChange}
-                  size="lg"
-                  userName={user.name}
-                />
-              </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 space-y-8">
+        {/* Enhanced Profile Header */}
+        <div className="relative">
+          {/* Background pattern */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl opacity-90"></div>
+          <div className="absolute inset-0 opacity-10 rounded-2xl" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }}></div>
+          
+          <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-purple-500/10 border border-white/20 p-8">
+            <div className="flex flex-col lg:flex-row items-start justify-between gap-8">
+              {/* Left Side - Profile Info */}
+              <div className="flex flex-col sm:flex-row items-start gap-6 flex-1">
+                {/* Enhanced Profile Picture */}
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+                  <div className="relative">
+                    <ProfilePictureUpload
+                      currentImageUrl={user.profile_picture_url}
+                      onImageChange={handleProfilePictureChange}
+                      size="lg"
+                      userName={user.name}
+                    />
+                  </div>
+                </div>
 
               {/* User Info */}
               <div className="flex-1">
@@ -444,22 +471,22 @@ export default function ProfilePage() {
                 <p className="text-purple-600 text-sm">Planned Trips</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">{userStats.plannedTrips}</p>
               </div>
-              <Calendar className="h-12 w-12 text-violet-500" />
             </div>
           </div>
 
-          <div className="bg-white/90 p-6 rounded-xl shadow-sm border border-purple-200/50 backdrop-blur-md">
-            <div className="flex items-center justify-between">
+          <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl p-6 rounded-2xl shadow-lg shadow-emerald-500/10 border border-white/20 hover:shadow-xl hover:shadow-emerald-500/20 transition-all duration-300 hover:-translate-y-1">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-teal-50 opacity-50"></div>
+            <div className="relative flex items-center justify-between">
               <div>
                 <p className="text-purple-600 text-sm">Completed Trips</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">{userStats.completedTrips}</p>
               </div>
-              <MapPin className="h-12 w-12 text-purple-500" />
             </div>
           </div>
 
-          <div className="bg-white/90 p-6 rounded-xl shadow-sm border border-purple-200/50 backdrop-blur-md">
-            <div className="flex items-center justify-between">
+          <div className="group relative overflow-hidden bg-white/80 backdrop-blur-xl p-6 rounded-2xl shadow-lg shadow-amber-500/10 border border-white/20 hover:shadow-xl hover:shadow-amber-500/20 transition-all duration-300 hover:-translate-y-1">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 opacity-50"></div>
+            <div className="relative flex items-center justify-between">
               <div>
                 <p className="text-purple-600 text-sm">Total Budget</p>
                 <p className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">
@@ -573,6 +600,23 @@ export default function ProfilePage() {
           )}
         </div>
       </main>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-8 right-8 z-50">
+        <button
+          onClick={() => router.push('/trips/new')}
+          className="group relative w-16 h-16 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 flex items-center justify-center"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
+          <Calendar className="h-8 w-8 text-white relative z-10 group-hover:rotate-12 transition-transform duration-300" />
+          
+          {/* Tooltip */}
+          <div className="absolute right-full mr-4 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+            Plan New Trip
+            <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
