@@ -119,13 +119,16 @@ export default function ProfilePictureUpload({
   };
 
   return (
-    <div className="relative">
+    <div className="relative group">
+      {/* Animated ring gradient */}
+      <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300 animate-pulse"></div>
+      
       <div
-        className={`${sizeClasses[size]} rounded-full overflow-hidden border-2 ${
-          dragOver ? 'border-primary border-dashed' : 'border-border'
+        className={`${sizeClasses[size]} rounded-full overflow-hidden relative ${
+          dragOver ? 'ring-4 ring-purple-400 ring-opacity-50' : ''
         } ${
-          editable ? 'cursor-pointer hover:border-primary/50' : 'cursor-default'
-        } transition-all duration-200 relative group`}
+          editable ? 'cursor-pointer hover:scale-105' : 'cursor-default'
+        } transition-all duration-300 relative group shadow-xl`}
         onDrop={editable ? handleDrop : undefined}
         onDragOver={editable ? handleDragOver : undefined}
         onDragLeave={editable ? handleDragLeave : undefined}
@@ -136,39 +139,49 @@ export default function ProfilePictureUpload({
           <img
             src={currentImageUrl}
             alt={userName || 'Profile'}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <span className={`text-muted-foreground font-bold ${textSizes[size]}`}>
-              {userName ? userName.charAt(0).toUpperCase() : <User className={iconSizes[size]} />}
+          <div className="w-full h-full bg-gradient-to-br from-purple-400 via-indigo-400 to-purple-500 flex items-center justify-center">
+            <span className={`text-white font-black ${textSizes[size]} drop-shadow-lg`}>
+              {userName ? userName.charAt(0).toUpperCase() : <User className={`${iconSizes[size]} text-white`} />}
             </span>
           </div>
         )}
 
-        {/* Upload Overlay */}
+        {/* Enhanced Upload Overlay */}
         {editable && (
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200 flex items-center justify-center">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+            <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
               {uploading ? (
-                <div className="animate-spin rounded-full border-2 border-white border-t-transparent w-6 h-6" />
+                <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Camera className="text-white h-6 w-6" />
+                <div className="flex flex-col items-center space-y-1">
+                  <Camera className="text-white h-6 w-6 drop-shadow-lg" />
+                  <span className="text-white text-xs font-semibold drop-shadow-lg">Change</span>
+                </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Drag Overlay */}
+        {/* Enhanced Drag Overlay */}
         {dragOver && editable && (
-          <div className="absolute inset-0 bg-primary/20 flex items-center justify-center border-2 border-primary border-dashed rounded-full">
-            <Upload className="text-primary h-6 w-6" />
+          <div className="absolute inset-0 bg-purple-500/30 backdrop-blur-sm flex items-center justify-center rounded-full border-4 border-purple-400 border-dashed">
+            <div className="text-center">
+              <Upload className="text-white h-8 w-8 mx-auto mb-1 drop-shadow-lg" />
+              <span className="text-white text-xs font-bold drop-shadow-lg">Drop here</span>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Delete Button - Hidden as per requirement */}
-      {/* The removal functionality is still available through the API if needed in the future */}
+      {/* Enhanced Upload Instructions */}
+      {/* {editable && !currentImageUrl && (
+        <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 text-xs text-gray-600 text-center whitespace-nowrap font-medium">
+          Click or drag to upload
+        </div>
+      )} */}
 
       {/* Hidden File Input */}
       <input
@@ -178,13 +191,6 @@ export default function ProfilePictureUpload({
         onChange={handleFileInputChange}
         className="hidden"
       />
-
-      {/* Upload Instructions */}
-      {editable && !currentImageUrl && (
-        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground text-center whitespace-nowrap">
-          Click or drag to upload
-        </div>
-      )}
     </div>
   );
 }
