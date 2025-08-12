@@ -127,7 +127,7 @@ export default function TripStats({ events }: TripStatsProps) {
   };
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-200/50 p-6">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-6">Travel Statistics</h3>
       
       <div className="grid grid-cols-1 gap-4">
@@ -136,7 +136,7 @@ export default function TripStats({ events }: TripStatsProps) {
           const colorClasses = getColorClasses(stat.color);
           
           return (
-            <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100">
+            <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
               <div className="flex items-center space-x-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colorClasses.replace('text-', 'bg-').replace('-600', '-100')}`}>
                   <Icon className={`h-5 w-5 ${colorClasses.split(' ')[1]}`} />
@@ -160,12 +160,12 @@ export default function TripStats({ events }: TripStatsProps) {
       <div className="mt-6 space-y-3">
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-600">Year Progress</span>
-            <span className="font-medium">{Math.round((currentMonth + 1) / 12 * 100)}%</span>
+            <span className="text-gray-800 font-medium">Year Progress</span>
+            <span className="font-bold text-gray-900">{Math.round((currentMonth + 1) / 12 * 100)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-gray-200 rounded-full h-3">
             <div 
-              className="bg-gradient-to-r from-purple-500 to-violet-600 h-2 rounded-full transition-all duration-300"
+              className="bg-purple-700 h-3 rounded-full transition-all duration-300"
               style={{ width: `${(currentMonth + 1) / 12 * 100}%` }}
             ></div>
           </div>
@@ -174,14 +174,14 @@ export default function TripStats({ events }: TripStatsProps) {
         {thisYearTrips > 0 && (
           <div>
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Trips Completed</span>
-              <span className="font-medium">
+              <span className="text-gray-800 font-medium">Trips Completed</span>
+              <span className="font-bold text-gray-900">
                 {Math.round(completedTrips / totalTrips * 100)}%
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-3">
               <div 
-                className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full transition-all duration-300"
+                className="bg-green-700 h-3 rounded-full transition-all duration-300"
                 style={{ width: `${completedTrips / totalTrips * 100}%` }}
               ></div>
             </div>
