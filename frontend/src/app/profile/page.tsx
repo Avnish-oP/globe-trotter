@@ -301,12 +301,12 @@ export default function ProfilePage() {
         {/* Trips Section */}
   <div className="bg-white/90 rounded-xl shadow-sm border border-purple-200/50 p-6 backdrop-blur-md">
           {/* Tab Navigation */}
-          <div className="flex space-x-1 mb-6 bg-gradient-to-r from-purple-100 via-violet-100 to-purple-50 p-1 rounded-lg w-fit">
+          <div className="flex space-x-1 mb-6 bg-purple-100 p-1 rounded-lg w-fit">
             <button
               onClick={() => setActiveTab('planned')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'planned'
-                  ? 'bg-gradient-to-r from-purple-200 to-violet-100 text-purple-900 shadow-md'
+                  ? 'bg-white text-purple-900 shadow-sm'
                   : 'text-purple-600 hover:text-purple-900'
               }`}
             >
@@ -316,7 +316,7 @@ export default function ProfilePage() {
               onClick={() => setActiveTab('previous')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'previous'
-                  ? 'bg-gradient-to-r from-purple-200 to-violet-100 text-purple-900 shadow-md'
+                  ? 'bg-white text-purple-900 shadow-sm'
                   : 'text-purple-600 hover:text-purple-900'
               }`}
             >
@@ -337,12 +337,12 @@ export default function ProfilePage() {
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <Calendar className="h-16 w-16 text-violet-300 mx-auto mb-4" />
-                  <h4 className="text-lg font-medium bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-2">No planned trips yet</h4>
-                  <p className="text-purple-600 mb-6">Start planning your next adventure!</p>
+                  <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">No planned trips yet</h4>
+                  <p className="text-gray-600 mb-6">Start planning your next adventure!</p>
                   <button 
                     onClick={() => router.push('/trips/new')}
-                    className="bg-gradient-to-r from-purple-500 to-violet-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-violet-700 transition-colors"
+                    className="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition-colors"
                   >
                     Plan New Trip
                   </button>
@@ -359,9 +359,9 @@ export default function ProfilePage() {
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
-                  <MapPin className="h-16 w-16 text-violet-300 mx-auto mb-4" />
-                  <h4 className="text-lg font-medium bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-2">No previous trips</h4>
-                  <p className="text-purple-600">Your completed trips will appear here.</p>
+                  <MapPin className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">No previous trips</h4>
+                  <p className="text-gray-600">Your completed trips will appear here.</p>
                 </div>
               )
             )}
