@@ -173,7 +173,7 @@ const TripsFilter: React.FC<TripsFilterProps> = ({
                 onChange={(e) => handleFilterChange({ 
                   dateRange: { ...activeFilters.dateRange, start: e.target.value }
                 })}
-                className="w-full px-3 py-2 bg-purple-50/50 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-purple-50/50 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black"
               />
             </div>
             <div>
@@ -184,7 +184,7 @@ const TripsFilter: React.FC<TripsFilterProps> = ({
                 onChange={(e) => handleFilterChange({ 
                   dateRange: { ...activeFilters.dateRange, end: e.target.value }
                 })}
-                className="w-full px-3 py-2 bg-purple-50/50 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-purple-50/50 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black"
               />
             </div>
           </div>

@@ -307,7 +307,7 @@ export default function CreateTripPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 lg:px-8 py-8 relative z-10">
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-100 p-8">
+  <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-[0_4px_32px_0_rgba(180,140,255,0.15)] border-2 border-[#C3B1E1] p-8">
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Trip Title */}
             <div className="space-y-4">
