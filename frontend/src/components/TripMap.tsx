@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { getPlaceImageUrl } from '@/lib/imageApi';
 
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(
@@ -139,10 +140,33 @@ const TripMap: React.FC<TripMapProps> = ({
   height = '400px'
 }) => {
   const [isClient, setIsClient] = useState(false);
+  const [placeImages, setPlaceImages] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    
+    // Preload images for all trip locations
+    const loadPlaceImages = async () => {
+      const imageMap = new Map<string, string>();
+      
+      for (const trip of trips) {
+        try {
+          const imageUrl = await getPlaceImageUrl(trip.name, 'small');
+          if (imageUrl) {
+            imageMap.set(trip.name, imageUrl);
+          }
+        } catch (error) {
+          console.error(`Error loading image for ${trip.name}:`, error);
+        }
+      }
+      
+      setPlaceImages(imageMap);
+    };
+
+    if (trips.length > 0) {
+      loadPlaceImages();
+    }
+  }, [trips]);
 
   if (!isClient) {
     return (
@@ -246,7 +270,21 @@ const TripMap: React.FC<TripMapProps> = ({
             icon={getIcon(trip.status)}
           >
             <Popup className="trip-popup">
-              <div className="p-2 min-w-[200px]">
+              <div className="p-2 min-w-[200px] max-w-[250px]">
+                {/* Place Image */}
+                {placeImages.has(trip.name) && (
+                  <div className="mb-3 -m-2 -mt-2">
+                    <img
+                      src={placeImages.get(trip.name)}
+                      alt={trip.name}
+                      className="w-full h-24 object-cover rounded-t"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold text-gray-800 text-sm">{trip.name}</h3>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(trip.status)}`}>

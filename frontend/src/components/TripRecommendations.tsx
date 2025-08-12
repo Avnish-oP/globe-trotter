@@ -14,6 +14,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { dashboardAPI, tripsAPI } from '@/lib/api';
+import { getPlaceImageUrl } from '@/lib/imageApi';
 
 interface PublicTrip {
   trip_id: string;
@@ -53,10 +54,65 @@ const TripRecommendations: React.FC<TripRecommendationsProps> = ({
   const [recommendedDestinations, setRecommendedDestinations] = useState<RecommendedDestination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'trips' | 'destinations'>('trips');
+  const [tripImages, setTripImages] = useState<Map<string, string>>(new Map());
+  const [destinationImages, setDestinationImages] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     fetchRecommendations();
   }, []);
+
+  useEffect(() => {
+    // Load images for public trips that don't have cover_image_url
+    const loadTripImages = async () => {
+      const imageMap = new Map<string, string>();
+      
+      for (const trip of publicTrips) {
+        if (!trip.cover_image_url && trip.cities.length > 0) {
+          try {
+            const firstCity = trip.cities[0];
+            const imageUrl = await getPlaceImageUrl(firstCity, 'regular');
+            if (imageUrl) {
+              imageMap.set(trip.trip_id, imageUrl);
+            }
+          } catch (error) {
+            console.error(`Error loading image for trip ${trip.trip_id}:`, error);
+          }
+        }
+      }
+      
+      setTripImages(imageMap);
+    };
+
+    if (publicTrips.length > 0) {
+      loadTripImages();
+    }
+  }, [publicTrips]);
+
+  useEffect(() => {
+    // Load images for recommended destinations that don't have image_url
+    const loadDestinationImages = async () => {
+      const imageMap = new Map<string, string>();
+      
+      for (const destination of recommendedDestinations) {
+        if (!destination.image_url) {
+          try {
+            const imageUrl = await getPlaceImageUrl(`${destination.name}, ${destination.country_name}`, 'regular');
+            if (imageUrl) {
+              imageMap.set(destination.city_id, imageUrl);
+            }
+          } catch (error) {
+            console.error(`Error loading image for destination ${destination.name}:`, error);
+          }
+        }
+      }
+      
+      setDestinationImages(imageMap);
+    };
+
+    if (recommendedDestinations.length > 0) {
+      loadDestinationImages();
+    }
+  }, [recommendedDestinations]);
 
   const fetchRecommendations = async () => {
     try {
@@ -111,43 +167,66 @@ const TripRecommendations: React.FC<TripRecommendationsProps> = ({
     return diffDays;
   };
 
-  const PublicTripCard = ({ trip }: { trip: PublicTrip }) => (
-    <div className="group bg-white/90 backdrop-blur-sm border border-purple-200/50 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
-      {/* Trip Image */}
-      {trip.cover_image_url && (
-        <div className="relative h-40 overflow-hidden">
-          <img 
-            src={trip.cover_image_url} 
-            alt={trip.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-          <div className="absolute top-3 right-3">
-            <div className="bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-              Public
+  const PublicTripCard = ({ trip }: { trip: PublicTrip }) => {
+    const fallbackImage = tripImages.get(trip.trip_id);
+    const displayImage = trip.cover_image_url || fallbackImage;
+    
+    return (
+      <div className="group bg-white/90 backdrop-blur-sm border border-purple-200/50 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+        {/* Trip Image */}
+        {displayImage ? (
+          <div className="relative h-40 overflow-hidden">
+            <img 
+              src={displayImage} 
+              alt={trip.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+            <div className="absolute top-3 right-3">
+              <div className="bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                Public
+              </div>
+            </div>
+            <div className="absolute bottom-3 left-3 text-white">
+              <h3 className="font-bold text-lg mb-1">{trip.title}</h3>
+              <p className="text-sm opacity-90 flex items-center">
+                <Users className="w-3 h-3 mr-1" />
+                by {trip.created_by}
+              </p>
             </div>
           </div>
-          <div className="absolute bottom-3 left-3 text-white">
-            <h3 className="font-bold text-lg mb-1">{trip.title}</h3>
-            <p className="text-sm opacity-90 flex items-center">
-              <Users className="w-3 h-3 mr-1" />
-              by {trip.created_by}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Trip Content */}
-      <div className="p-4">
-        {!trip.cover_image_url && (
-          <div className="mb-3">
-            <h3 className="font-semibold text-lg text-gray-800 mb-1">{trip.title}</h3>
-            <p className="text-sm text-purple-600 flex items-center">
-              <Users className="w-4 h-4 mr-1" />
-              by {trip.created_by}
-            </p>
+        ) : (
+          <div className="relative h-40 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
+            <MapPin className="w-12 h-12 text-violet-300" />
+            <div className="absolute top-3 right-3">
+              <div className="bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                Public
+              </div>
+            </div>
+            <div className="absolute bottom-3 left-3 text-gray-700">
+              <h3 className="font-bold text-lg mb-1">{trip.title}</h3>
+              <p className="text-sm opacity-90 flex items-center">
+                <Users className="w-3 h-3 mr-1" />
+                by {trip.created_by}
+              </p>
+            </div>
           </div>
         )}
+
+        {/* Trip Content */}
+        <div className="p-4">
+          {!displayImage && (
+            <div className="mb-3">
+              <h3 className="font-semibold text-lg text-gray-800 mb-1">{trip.title}</h3>
+              <p className="text-sm text-purple-600 flex items-center">
+                <Users className="w-4 h-4 mr-1" />
+                by {trip.created_by}
+              </p>
+            </div>
+          )}
 
         <div className="space-y-3">
           <div className="flex items-center text-sm text-gray-600">
@@ -202,42 +281,66 @@ const TripRecommendations: React.FC<TripRecommendationsProps> = ({
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
-  const DestinationCard = ({ destination }: { destination: RecommendedDestination }) => (
-    <div className="group bg-white/90 backdrop-blur-sm border border-purple-200/50 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
-      {/* Destination Image */}
-      {destination.image_url && (
-        <div className="relative h-40 overflow-hidden">
-          <img 
-            src={destination.image_url} 
-            alt={destination.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-          {destination.matching_activities && (
-            <div className="absolute top-3 right-3">
-              <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
-                <Star className="w-3 h-3 mr-1" />
-                Match
+  const DestinationCard = ({ destination }: { destination: RecommendedDestination }) => {
+    const fallbackImage = destinationImages.get(destination.city_id);
+    const displayImage = destination.image_url || fallbackImage;
+    
+    return (
+      <div className="group bg-white/90 backdrop-blur-sm border border-purple-200/50 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
+        {/* Destination Image */}
+        {displayImage ? (
+          <div className="relative h-40 overflow-hidden">
+            <img 
+              src={displayImage} 
+              alt={destination.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+            {destination.matching_activities && (
+              <div className="absolute top-3 right-3">
+                <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                  <Star className="w-3 h-3 mr-1" />
+                  Match
+                </div>
               </div>
+            )}
+            <div className="absolute bottom-3 left-3 text-white">
+              <h3 className="font-bold text-lg mb-1">{destination.name}</h3>
+              <p className="text-sm opacity-90">{destination.country_name}</p>
             </div>
-          )}
-          <div className="absolute bottom-3 left-3 text-white">
-            <h3 className="font-bold text-lg mb-1">{destination.name}</h3>
-            <p className="text-sm opacity-90">{destination.country_name}</p>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="relative h-40 bg-gradient-to-br from-purple-100 to-violet-100 flex items-center justify-center">
+            <MapPin className="w-12 h-12 text-violet-300" />
+            {destination.matching_activities && (
+              <div className="absolute top-3 right-3">
+                <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                  <Star className="w-3 h-3 mr-1" />
+                  Match
+                </div>
+              </div>
+            )}
+            <div className="absolute bottom-3 left-3 text-gray-700">
+              <h3 className="font-bold text-lg mb-1">{destination.name}</h3>
+              <p className="text-sm opacity-90">{destination.country_name}</p>
+            </div>
+          </div>
+        )}
 
-      {/* Destination Content */}
-      <div className="p-4">
-        {!destination.image_url && (
-          <div className="mb-3">
-            <h3 className="font-semibold text-lg text-gray-800 mb-1">{destination.name}</h3>
-            <p className="text-sm text-gray-600 flex items-center">
-              <MapPin className="w-4 h-4 mr-1" />
-              {destination.country_name}
+        {/* Destination Content */}
+        <div className="p-4">
+          {!displayImage && (
+            <div className="mb-3">
+              <h3 className="font-semibold text-lg text-gray-800 mb-1">{destination.name}</h3>
+              <p className="text-sm text-gray-600 flex items-center">
+                <MapPin className="w-4 h-4 mr-1" />
+                {destination.country_name}
             </p>
           </div>
         )}
@@ -277,7 +380,8 @@ const TripRecommendations: React.FC<TripRecommendationsProps> = ({
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   if (isLoading) {
     return (

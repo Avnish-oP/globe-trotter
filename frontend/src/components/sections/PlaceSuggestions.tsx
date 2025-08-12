@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { sectionsAPI } from '@/lib/api';
+import { getPlaceImageUrl } from '@/lib/imageApi';
 
 interface Place {
   name: string;
@@ -24,6 +25,7 @@ export default function PlaceSuggestions({ sectionId, sectionTitle, onPlacesSave
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [placeImages, setPlaceImages] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     loadSuggestions();
@@ -36,7 +38,24 @@ export default function PlaceSuggestions({ sectionId, sectionTitle, onPlacesSave
       const response = await sectionsAPI.getSuggestions(sectionId);
       
       if (response.success && response.data?.suggestions?.places) {
-        setSuggestions(response.data.suggestions.places);
+        const places = response.data.suggestions.places;
+        setSuggestions(places);
+        
+        // Load images for all suggested places
+        const imageMap = new Map<string, string>();
+        
+        for (const place of places) {
+          try {
+            const imageUrl = await getPlaceImageUrl(place.name, 'small');
+            if (imageUrl) {
+              imageMap.set(place.name, imageUrl);
+            }
+          } catch (error) {
+            console.error(`Error loading image for ${place.name}:`, error);
+          }
+        }
+        
+        setPlaceImages(imageMap);
       } else {
         setError('No suggestions available for this location');
       }
@@ -147,39 +166,68 @@ export default function PlaceSuggestions({ sectionId, sectionTitle, onPlacesSave
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             {suggestions.map((place, index) => {
               const selected = isPlaceSelected(place);
+              const placeImage = placeImages.get(place.name);
+              
               return (
                 <div
                   key={index}
                   onClick={() => togglePlaceSelection(place)}
                   className={`
-                    border-2 rounded-lg p-4 cursor-pointer transition-all
+                    border-2 rounded-lg overflow-hidden cursor-pointer transition-all
                     ${selected 
                       ? 'border-blue-500 bg-blue-50' 
                       : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
                     }
                   `}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-semibold text-gray-900 flex-1">{place.name}</h4>
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={() => togglePlaceSelection(place)}
-                      className="ml-2 mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                  </div>
+                  {/* Place Image */}
+                  {placeImage && (
+                    <div className="relative h-32 w-full">
+                      <img
+                        src={placeImage}
+                        alt={place.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                      <div className="absolute top-2 right-2">
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => togglePlaceSelection(place)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </div>
+                    </div>
+                  )}
                   
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">
-                    {place.description}
-                  </p>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-semibold text-gray-900 flex-1">{place.name}</h4>
+                      {!placeImage && (
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => togglePlaceSelection(place)}
+                          className="ml-2 mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      )}
+                    </div>
                   
-                  <div className="flex items-center justify-between text-xs">
-                    <span className={`px-2 py-1 rounded-full ${getPopularityColor(place.popularity)}`}>
-                      {place.popularity}
-                    </span>
-                    <span className="text-gray-700 font-medium">
-                      {place.estimated_cost}
-                    </span>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                      {place.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <span className={`px-2 py-1 rounded-full ${getPopularityColor(place.popularity)}`}>
+                        {place.popularity}
+                      </span>
+                      <span className="text-gray-700 font-medium">
+                        {place.estimated_cost}
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
