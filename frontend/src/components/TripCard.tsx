@@ -46,9 +46,9 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
   };
 
   return (
-    <div className="group bg-white/95 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1">
-      {/* Enhanced Trip Image */}
-      <div className="relative h-48 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow overflow-hidden">
+      {/* Trip Image */}
+      <div className="relative h-48 bg-gradient-to-br from-green-100 to-purple-100">
         {trip.imageUrl ? (
           <img 
             src={trip.imageUrl} 
@@ -88,6 +88,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
             <span className="font-medium">{trip.destination}</span>
           </div>
           
+          
           {trip.startDate && (
             <div className="flex items-center text-gray-600 group-hover:text-purple-600 transition-colors">
               <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
@@ -99,6 +100,7 @@ export const TripCard: React.FC<TripCardProps> = ({ trip, onView }) => {
               </span>
             </div>
           )}
+          
           
           {trip.budget && (
             <div className="flex items-center text-gray-600 group-hover:text-purple-600 transition-colors">

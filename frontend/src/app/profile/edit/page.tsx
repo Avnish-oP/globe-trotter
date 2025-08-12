@@ -205,7 +205,6 @@ export default function EditProfilePage() {
                   onChange={(e) => handleInputChange('preferred_currency', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
-                  <option value="">Select your preferred currency</option>
                   {currencies.map((currency) => (
                     <option key={currency.value} value={currency.value}>
                       {currency.label}
