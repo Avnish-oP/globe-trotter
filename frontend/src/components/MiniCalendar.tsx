@@ -88,16 +88,16 @@ export default function MiniCalendar({ currentDate, onDateChange, events }: Mini
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-purple-200/50 p-4">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
       <div className="flex items-center justify-between mb-3">
         <button
           onClick={() => navigateMonth('prev')}
           className="p-1 hover:bg-purple-100 rounded transition-colors"
         >
-          <ChevronLeft className="h-4 w-4 text-purple-600" />
+          <ChevronLeft className="h-4 w-4 text-purple-700" />
         </button>
         
-        <h3 className="text-sm font-semibold text-gray-900">
+        <h3 className="text-sm font-bold text-gray-900">
           {monthNames[month]} {year}
         </h3>
         
@@ -105,13 +105,13 @@ export default function MiniCalendar({ currentDate, onDateChange, events }: Mini
           onClick={() => navigateMonth('next')}
           className="p-1 hover:bg-purple-100 rounded transition-colors"
         >
-          <ChevronRight className="h-4 w-4 text-purple-600" />
+          <ChevronRight className="h-4 w-4 text-purple-700" />
         </button>
       </div>
 
       <div className="grid grid-cols-7 gap-1 mb-2">
         {dayNames.map((day, index) => (
-          <div key={index} className="text-xs text-gray-500 text-center font-medium">
+          <div key={index} className="text-xs text-gray-700 text-center font-bold">
             {day}
           </div>
         ))}
@@ -121,10 +121,10 @@ export default function MiniCalendar({ currentDate, onDateChange, events }: Mini
         {calendarDays}
       </div>
 
-      <div className="mt-3 flex items-center justify-center text-xs text-gray-500">
+      <div className="mt-3 flex items-center justify-center text-xs text-gray-700">
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-          <span>Has events</span>
+          <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+          <span className="font-medium">Has events</span>
         </div>
       </div>
     </div>
