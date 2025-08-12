@@ -351,12 +351,12 @@ export default function ProfilePage() {
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
                   <div className="relative">
-                    <ProfilePictureUpload
-                      currentImageUrl={user.profile_picture_url}
-                      onImageChange={handleProfilePictureChange}
-                      size="lg"
-                      userName={user.name}
-                    />
+                      <ProfilePictureUpload
+                        currentImageUrl={user.profile_picture_url}
+                        onImageChange={handleProfilePictureChange}
+                        size="lg"
+                        userName={user.name}
+                      />
                   </div>
                 </div>
 
@@ -395,6 +395,7 @@ export default function ProfilePage() {
 
             {/* Right Side - Total Trips */}
             <div className="text-center">
+              </div>
         <div className="bg-gradient-to-r from-purple-100 to-violet-100 rounded-lg p-4 min-w-[120px]">
           <div className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent mb-1">{userStats.totalTrips}</div>
           <div className="text-sm text-purple-600">Total Trips</div>
