@@ -68,6 +68,50 @@ interface City {
   popularity_score?: number;
 }
 
+// Doodle SVGs for background
+const doodleSvgs = [
+  <svg key="bag" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="12" y="20" width="24" height="18" rx="4"/><path d="M16 20v-4a8 8 0 0 1 16 0v4"/></svg>,
+  <svg key="trolley" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="16" y="16" width="16" height="20" rx="3"/><path d="M24 16v-6"/><circle cx="20" cy="38" r="2"/><circle cx="28" cy="38" r="2"/></svg>,
+  <svg key="umbrella" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M8 24a16 16 0 0 1 32 0z"/><path d="M24 24v12"/><circle cx="24" cy="40" r="2"/></svg>,
+  <svg key="bus" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="6" y="18" width="36" height="16" rx="4"/><circle cx="14" cy="36" r="2"/><circle cx="34" cy="36" r="2"/><path d="M6 26h36"/></svg>,
+  <svg key="backpack" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="14" y="18" width="20" height="18" rx="6"/><path d="M24 18v-6"/><path d="M18 36v4"/><path d="M30 36v4"/></svg>,
+  <svg key="camera" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><rect x="10" y="18" width="28" height="18" rx="4"/><circle cx="24" cy="27" r="6"/><path d="M18 18l2-4h8l2 4"/></svg>,
+  <svg key="mountain" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><path d="M4 40l12-20 8 12 8-16 12 24z"/></svg>,
+  <svg key="trekking" fill="none" stroke="#a78bfa" strokeWidth="2" viewBox="0 0 48 48"><circle cx="24" cy="24" r="10"/><path d="M24 14v10l7 7"/></svg>,
+];
+
+function DoodleBackground({ count = 40 }) {
+  const doodles = React.useMemo(() => {
+    return Array.from({ length: count }).map((_, i) => {
+      const Svg = doodleSvgs[Math.floor(Math.random() * doodleSvgs.length)];
+      const top = Math.random() * 100;
+      const left = Math.random() * 100;
+      const size = 16 + Math.random() * 32;
+      const opacity = 0.10 + Math.random() * 0.18;
+      const rotate = Math.random() * 360;
+      return (
+        <div
+          key={i}
+          style={{
+            position: 'absolute',
+            top: `${top}%`,
+            left: `${left}%`,
+            width: size,
+            height: size,
+            opacity,
+            transform: `rotate(${rotate}deg)`,
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}
+        >
+          {React.cloneElement(Svg, { width: size, height: size })}
+        </div>
+      );
+    });
+  }, [count]);
+  return <>{doodles}</>;
+}
+
 export default function DashboardPage() {
   const { user, logout, isAuthenticated, loading } = useAuth();
   const router = useRouter();
