@@ -205,7 +205,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                   value={searchParams.q || ''}
                   onChange={(e) => setSearchParams(prev => ({ ...prev, q: e.target.value }))}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500"
                 />
               </div>
             </div>
@@ -249,7 +249,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                     placeholder="City or landmark"
                     value={searchParams.destination || ''}
                     onChange={(e) => setSearchParams(prev => ({ ...prev, destination: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500"
                   />
                 </div>
 
@@ -262,7 +262,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                   <select
                     value={searchParams.activity || ''}
                     onChange={(e) => setSearchParams(prev => ({ ...prev, activity: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
                   >
                     <option value="">All Activities</option>
                     {searchFilters?.activities?.map((activity) => (
@@ -282,7 +282,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                   <select
                     value={searchParams.country || ''}
                     onChange={(e) => setSearchParams(prev => ({ ...prev, country: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
                   >
                     <option value="">All Countries</option>
                     {searchFilters?.countries?.map((country) => (
@@ -308,7 +308,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                         order: order as any
                       }));
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
                   >
                     <option value="created_at-desc">Newest First</option>
                     <option value="created_at-asc">Oldest First</option>
@@ -332,7 +332,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                     type="date"
                     value={searchParams.start_date || ''}
                     onChange={(e) => setSearchParams(prev => ({ ...prev, start_date: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
                   />
                 </div>
                 <div>
@@ -343,7 +343,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                     type="date"
                     value={searchParams.end_date || ''}
                     onChange={(e) => setSearchParams(prev => ({ ...prev, end_date: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white"
                   />
                 </div>
               </div>
@@ -360,7 +360,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                     placeholder="0"
                     value={searchParams.budget_min || ''}
                     onChange={(e) => setSearchParams(prev => ({ ...prev, budget_min: parseInt(e.target.value) || undefined }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500"
                   />
                 </div>
                 <div>
@@ -372,7 +372,7 @@ export default function AdvancedSearch({ onClose, isModal = false }: AdvancedSea
                     placeholder="No limit"
                     value={searchParams.budget_max || ''}
                     onChange={(e) => setSearchParams(prev => ({ ...prev, budget_max: parseInt(e.target.value) || undefined }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500"
                   />
                 </div>
               </div>
